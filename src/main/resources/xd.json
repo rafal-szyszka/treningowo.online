@@ -1,0 +1,106 @@
+{
+  "attributesDCOs": [
+    {
+      "attributeId": 8,
+      "primitiveInstanceDCO": {
+        "primitiveId": 1,
+        "value": "Rafał"
+      }
+    },
+    {
+      "attributeId": 9,
+      "primitiveInstanceDCO": {
+        "primitiveId": 1,
+        "value": "Szyszka"
+      }
+    },
+    {
+      "attributeId": 10,
+      "primitiveInstanceDCO": {
+        "primitiveId": 2,
+        "value": "26"
+      }
+    },
+    {
+      "attributeId": 11,
+      "primitiveInstanceDCO": {
+        "primitiveId": 1,
+        "value": "rafal.sz.49@gmail.com"
+      }
+    },
+    {
+      "attributeId": 12,
+      "referenceType": {
+        "typeId": 1,
+        "attributesDCOs": [
+          {
+            "attributeId": 2,
+            "primitiveInstanceDCO": {
+              "primitiveId": 1,
+              "value": "Brzeska"
+            }
+          },
+          {
+            "attributeId": 3,
+            "primitiveInstanceDCO": {
+              "primitiveId": 1,
+              "value": "9"
+            }
+          },
+          {
+            "attributeId": 4,
+            "primitiveInstanceDCO": {
+              "primitiveId": 1,
+              "value": "25"
+            }
+          },
+          {
+            "attributeId": 5,
+            "primitiveInstanceDCO": {
+              "primitiveId": 1,
+              "value": "Wrocław"
+            }
+          },
+          {
+            "attributeId": 6,
+            "primitiveInstanceDCO": {
+              "primitiveId": 1,
+              "value": "50-430"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "typeId": 7
+}
+
+
+
+
+
+//pracownik
+{
+  "attributes": [
+    {
+      "name": "Imię",
+      "typeId": 1
+    }
+  ],
+  "name": "Pracownik"
+}
+
+//firma
+{
+  "attributes": [
+    {
+      "name": "Pracownik 1",
+      "referenceTypeId": 13
+    },
+    {
+      "name": "Pracownik 2",
+      "referenceTypeId": 13
+    }
+  ],
+  "name": "Firma"
+}
