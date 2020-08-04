@@ -1,4 +1,4 @@
-package com.prodactivv.app.registration.service;
+package com.prodactivv.app.user.service;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

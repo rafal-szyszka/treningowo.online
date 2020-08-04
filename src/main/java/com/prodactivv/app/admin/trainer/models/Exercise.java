@@ -26,11 +26,14 @@ public class Exercise {
     @Column(length = 10000)
     private String description;
 
+    private String section;
+
     public Exercise update(Exercise exercise) {
         this.id = exercise.id;
         this.name = exercise.name;
         this.videoUrl = exercise.videoUrl;
         this.description = exercise.description;
+        this.section = exercise.section;
 
         return this;
     }

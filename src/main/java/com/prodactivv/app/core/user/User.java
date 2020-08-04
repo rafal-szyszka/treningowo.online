@@ -1,5 +1,6 @@
 package com.prodactivv.app.core.user;
 
+import com.prodactivv.app.core.subscription.SubscriptionPlan;
 import lombok.*;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -8,6 +9,10 @@ import javax.validation.constraints.Email;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,9 +34,16 @@ public class User {
 
     private String lastName;
 
+    private LocalDate birthday;
+
+    private LocalDate signedUpDate;
+
     private Integer age;
 
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Sex sex;
 
     public static User of(UserDTO userDto) {
         return User.builder()
@@ -40,6 +52,9 @@ public class User {
                 .lastName(userDto.getLastName())
                 .name(userDto.getName())
                 .email(userDto.getEmail())
+                .birthday(userDto.getBirthday())
+                .signedUpDate(userDto.getSignedUpDate())
+                .sex(userDto.getSex())
                 .build();
     }
 
@@ -50,6 +65,20 @@ public class User {
                 password.getBytes(StandardCharsets.UTF_8)
         );
         password = new String(Hex.encode(hash));
+    }
+
+    public enum Sex {
+        MALE("male"), FEMALE("female");
+
+        private String sex;
+
+        Sex(String sex) {
+            this.sex = sex;
+        }
+
+        public String getSex() {
+            return sex;
+        }
     }
 
 }
