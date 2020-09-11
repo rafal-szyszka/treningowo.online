@@ -1,10 +1,12 @@
 package com.prodactivv.app.admin.trainer.models;
 
+import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
 import lombok.*;
 
 import javax.persistence.*;
-
-import static com.prodactivv.app.admin.trainer.models.ActivityDay.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -20,33 +22,27 @@ public class WorkoutPlan {
 
     private String name;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "monday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay monday;
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "workout_plan_workout_weeks",
+            joinColumns = @JoinColumn(name = "workout_plan_id"),
+            inverseJoinColumns = @JoinColumn(name = "activity_week_id"))
+    private Set<ActivityWeek> activityWeeks;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "tuesday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay tuesday;
+    public void addWorkoutWeek(ActivityWeek activityWeek) {
+        if (activityWeeks == null) {
+            activityWeeks = new HashSet<>();
+        }
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "wednesday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay wednesday;
+        activityWeeks.add(activityWeek);
+    }
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "thursday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay thursday;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "friday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay friday;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "saturday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay saturday;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "sunday_activity_day_id", referencedColumnName = "id")
-    private ActivityDay sunday;
+    public boolean removeActivityWeek(ActivityWeek activityWeek) {
+        if (activityWeeks != null) {
+            return activityWeeks.remove(activityWeek);
+        }
+        return false;
+    }
 
     @Setter
     @Getter
@@ -55,13 +51,30 @@ public class WorkoutPlan {
     public static class WorkoutPlanDTO {
 
         private String name;
-        private ActivityDayDTO monday;
-        private ActivityDayDTO tuesday;
-        private ActivityDayDTO wednesday;
-        private ActivityDayDTO thursday;
-        private ActivityDayDTO friday;
-        private ActivityDayDTO saturday;
-        private ActivityDayDTO sunday;
+        private List<ActivityWeekDTO> activityWeeks;
 
+    }
+
+    @Setter
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class WorkoutPlanManagerDTO {
+
+        private Long id;
+        private String name;
+        private List<ActivityWeekManagerDTO> activityWeeks;
+
+        public static WorkoutPlanManagerDTO of(WorkoutPlan workoutPlan) {
+            return new WorkoutPlanManagerDTO(
+                    workoutPlan.id,
+                    workoutPlan.name,
+                    workoutPlan.activityWeeks.stream()
+                            .map(ActivityWeekManagerDTO::of)
+                            .filter(Optional::isPresent)
+                            .map(Optional::get)
+                            .collect(Collectors.toList())
+            );
+        }
     }
 }

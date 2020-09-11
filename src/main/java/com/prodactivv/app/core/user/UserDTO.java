@@ -20,7 +20,7 @@ public class UserDTO {
     private Integer age;
     private LocalDate birthday;
     private LocalDate signedUpDate;
-    private User.Sex sex;
+    private String sex;
 
     @JsonIgnore @StrongPassword
     private String password;
@@ -34,6 +34,7 @@ public class UserDTO {
                 .age(user.getAge())
                 .birthday(user.getBirthday())
                 .signedUpDate(user.getSignedUpDate())
+                .sex(user.getSex())
                 .build();
     }
 }

@@ -1,11 +1,11 @@
 package com.prodactivv.app.admin.trainer.models;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,6 +13,7 @@ import javax.persistence.Id;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "name")
 public class Exercise {
 
     @Id
@@ -27,6 +28,12 @@ public class Exercise {
     private String description;
 
     private String section;
+
+    @OneToMany(
+            mappedBy = "exercise",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<DetailedExercise> detailedExercises;
 
     public Exercise update(Exercise exercise) {
         this.id = exercise.id;

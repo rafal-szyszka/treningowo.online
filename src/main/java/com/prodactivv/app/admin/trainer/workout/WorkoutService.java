@@ -1,13 +1,14 @@
 package com.prodactivv.app.admin.trainer.workout;
 
-import com.prodactivv.app.admin.trainer.models.DetailedExercise;
 import com.prodactivv.app.admin.trainer.models.Workout;
 import com.prodactivv.app.admin.trainer.models.Workout.WorkoutDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityWeek;
 import com.prodactivv.app.admin.trainer.models.repositories.WorkoutRepository;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
 import org.springframework.stereotype.Service;
 
 import static com.prodactivv.app.admin.trainer.models.DetailedExercise.*;
+import static com.prodactivv.app.admin.trainer.models.ActivityWeek.*;
 
 @Service
 public class WorkoutService {

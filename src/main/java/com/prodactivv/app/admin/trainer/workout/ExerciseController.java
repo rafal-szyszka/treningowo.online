@@ -31,6 +31,24 @@ public class ExerciseController {
         }
     }
 
+    @GetMapping(value = "/detail/{id}")
+    public ResponseEntity<DetailedExercise> getDetailedExercise(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(exerciseService.getDetailedExercise(id));
+        } catch (ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @DeleteMapping(value = "/detail/{id}")
+    public ResponseEntity<DetailedExercise> deleteDetailedExercise(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(exerciseService.deleteDetailedExercise(id));
+        } catch (ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Exercise> addExercise(@RequestBody Exercise exercise) {
         return ResponseEntity.ok(exerciseService.createExercise(exercise));

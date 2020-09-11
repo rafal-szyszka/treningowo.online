@@ -50,4 +50,15 @@ public class ExerciseService {
                 .orElseThrow(new ExerciseNotFoundException(detailedExerciseDTO.getExerciseId()));
         return detailedExerciseRepository.save(new DetailedExercise(detailedExerciseDTO, exercise));
     }
+
+    public DetailedExercise getDetailedExercise(Long id) throws ExerciseNotFoundException {
+        return detailedExerciseRepository.findById(id).orElseThrow(new ExerciseNotFoundException(id));
+    }
+
+    public DetailedExercise deleteDetailedExercise(Long id) throws ExerciseNotFoundException {
+        DetailedExercise detailedExercise = detailedExerciseRepository.findById(id).orElseThrow(new ExerciseNotFoundException(id));
+        detailedExerciseRepository.delete(detailedExercise);
+        detailedExercise.setId(-1L);
+        return detailedExercise;
+    }
 }

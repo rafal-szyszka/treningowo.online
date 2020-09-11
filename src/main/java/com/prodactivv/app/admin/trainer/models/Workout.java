@@ -4,7 +4,9 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.prodactivv.app.admin.trainer.models.DetailedExercise.*;
 
@@ -27,11 +29,11 @@ public class Workout {
             name = "workout_exercies",
             joinColumns = @JoinColumn(name = "workout_id"),
             inverseJoinColumns = @JoinColumn(name = "detailed_exercise_id"))
-    private List<DetailedExercise> exercises;
+    private Set<DetailedExercise> exercises;
 
     public void addExercise(DetailedExercise detailedExercise) {
         if (exercises == null) {
-            exercises = new ArrayList<>();
+            exercises = new HashSet<>();
         }
 
         exercises.add(detailedExercise);

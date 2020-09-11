@@ -1,5 +1,7 @@
 package com.prodactivv.app.admin.trainer.workout;
 
+import com.prodactivv.app.admin.trainer.models.ActivityWeek;
+import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.repositories.UsersWorkoutPlanRepository;
@@ -28,5 +30,4 @@ public class UsersWorkoutPlanService {
 
         return repository.save(plan);
     }
-
 }

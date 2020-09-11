@@ -42,8 +42,7 @@ public class User {
 
     private String password;
 
-    @Enumerated(EnumType.STRING)
-    private Sex sex;
+    private String sex;
 
     public static User of(UserDTO userDto) {
         return User.builder()
@@ -65,20 +64,6 @@ public class User {
                 password.getBytes(StandardCharsets.UTF_8)
         );
         password = new String(Hex.encode(hash));
-    }
-
-    public enum Sex {
-        MALE("male"), FEMALE("female");
-
-        private String sex;
-
-        Sex(String sex) {
-            this.sex = sex;
-        }
-
-        public String getSex() {
-            return sex;
-        }
     }
 
 }

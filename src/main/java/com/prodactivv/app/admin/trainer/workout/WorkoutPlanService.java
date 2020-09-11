@@ -1,38 +1,68 @@
 package com.prodactivv.app.admin.trainer.workout;
 
-import com.prodactivv.app.admin.trainer.models.ActivityDay;
+import com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
+import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanDTO;
+import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanManagerDTO;
 import com.prodactivv.app.admin.trainer.models.repositories.WorkoutPlanRepository;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
+import com.prodactivv.app.core.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import static com.prodactivv.app.admin.trainer.models.DetailedExercise.*;
 
 @Service
 public class WorkoutPlanService {
 
-    private final WorkoutPlanRepository repository;
-    private final ActivityDayService activityDayService;
+    public static final String WORKOUT_PLAN_NOT_FOUND_MSG = "Workout plan %s not found";
 
-    public WorkoutPlanService(WorkoutPlanRepository repository, ActivityDayService activityDayService) {
+    private final WorkoutPlanRepository repository;
+    private final ActivityService activityService;
+
+    public WorkoutPlanService(WorkoutPlanRepository repository, ActivityService activityService) {
         this.repository = repository;
-        this.activityDayService = activityDayService;
+        this.activityService = activityService;
     }
 
     public WorkoutPlan createWorkoutPlan(WorkoutPlanDTO workoutPlanDTO) throws ExerciseNotFoundException {
         WorkoutPlan plan = new WorkoutPlan();
 
         plan.setName(workoutPlanDTO.getName());
-        activityDayService.createActivityDay(workoutPlanDTO.getMonday()).ifPresent(plan::setMonday);
-        activityDayService.createActivityDay(workoutPlanDTO.getTuesday()).ifPresent(plan::setTuesday);
-        activityDayService.createActivityDay(workoutPlanDTO.getWednesday()).ifPresent(plan::setWednesday);
-        activityDayService.createActivityDay(workoutPlanDTO.getThursday()).ifPresent(plan::setThursday);
-        activityDayService.createActivityDay(workoutPlanDTO.getFriday()).ifPresent(plan::setFriday);
-        activityDayService.createActivityDay(workoutPlanDTO.getSaturday()).ifPresent(plan::setSaturday);
-        activityDayService.createActivityDay(workoutPlanDTO.getSunday()).ifPresent(plan::setSunday);
+        for (ActivityWeekDTO activityWeekDTO: workoutPlanDTO.getActivityWeeks()) {
+            plan.addWorkoutWeek(activityService.createActivityWeek(activityWeekDTO));
+        }
 
         return repository.save(plan);
     }
 
+    public WorkoutPlanManagerDTO addEmptyActivityWeekToUserPlan(Long id, ActivityWeekDTO activityWeekDTO) throws NotFoundException, ExerciseNotFoundException {
+        WorkoutPlan workoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format(WORKOUT_PLAN_NOT_FOUND_MSG, id)));
+
+        workoutPlan.addWorkoutWeek(activityService.createActivityWeek(activityWeekDTO));
+
+        return WorkoutPlanManagerDTO.of(repository.save(workoutPlan));
+    }
+
+    public ActivityWeekManagerDTO addEmptyActivityDayToActivityWeek(Long id, ActivityDayManagerDTO activityDayDTO) throws Exception {
+        return ActivityWeekManagerDTO.of(activityService.addActivityDayToActivityWeek(id, activityDayDTO)).orElseThrow(Exception::new);
+    }
+
+    public ActivityDayManagerDTO addExerciseToActivityDay(Long id, DetailedExerciseDTO exerciseDTO) throws NotFoundException, ExerciseNotFoundException {
+        return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, exerciseDTO));
+    }
+
+    public ActivityWeekManagerDTO removeActivityWeekFromUserPlan(Long id) throws NotFoundException {
+        return activityService.removeActivityWeekFromUserPlan(id);
+    }
+
+    public ActivityDayManagerDTO removeActivityDayFromActivityWeek(Long id) throws NotFoundException {
+        return activityService.removeActivityDayFromActivityWeek(id);
+    }
+
+    public DetailedExerciseManagerDTO removeExerciseFromActivityDay(Long id) throws ExerciseNotFoundException {
+        return activityService.removeExerciseFromActivityDay(id);
+    }
 }
