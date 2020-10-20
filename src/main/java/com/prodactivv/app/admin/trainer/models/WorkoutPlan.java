@@ -3,6 +3,7 @@ package com.prodactivv.app.admin.trainer.models;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
 import lombok.*;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.util.*;
@@ -46,6 +47,7 @@ public class WorkoutPlan {
 
     @Setter
     @Getter
+    @ToString
     @NoArgsConstructor
     @AllArgsConstructor
     public static class WorkoutPlanDTO {
@@ -53,6 +55,18 @@ public class WorkoutPlan {
         private String name;
         private List<ActivityWeekDTO> activityWeeks;
 
+        public boolean isNotEmpty() {
+            return name != null || activityWeeks != null;
+        }
+
+        public static WorkoutPlanDTO getEmpty(String planName, String weekName, String dayName) {
+            return new WorkoutPlanDTO(
+                    planName,
+                    Collections.singletonList(ActivityWeekDTO.getEmpty(
+                            weekName, dayName
+                    ))
+            );
+        }
     }
 
     @Setter

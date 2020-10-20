@@ -1,12 +1,13 @@
 package com.prodactivv.app.admin.trainer.workout;
 
-import com.prodactivv.app.admin.trainer.models.*;
 import com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
+import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanManagerDTO;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
+import com.prodactivv.app.config.Strings;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -14,22 +15,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 import static com.prodactivv.app.admin.trainer.models.ActivityWeek.*;
 
 @RestController
 @RequestMapping(value = "/admin/workout")
 public class WorkoutPrepController {
 
+    private final Strings strings;
     private final WorkoutPlanService workoutPlanService;
     private final UsersWorkoutPlanService usersWorkoutPlanService;
 
-    public WorkoutPrepController(WorkoutPlanService workoutPlanService, UsersWorkoutPlanService usersWorkoutPlanService) {
+    public WorkoutPrepController(Strings strings, WorkoutPlanService workoutPlanService, UsersWorkoutPlanService usersWorkoutPlanService) {
+        this.strings = strings;
         this.workoutPlanService = workoutPlanService;
         this.usersWorkoutPlanService = usersWorkoutPlanService;
     }
 
     @PostMapping(value = "/create/complete/forUser/{id}")
-    public ResponseEntity<UsersWorkoutPlan> createCompleteWorkoutPlan(
+    public ResponseEntity<UsersWorkoutPlanDTO> createCompleteWorkoutPlan(
             @PathVariable Long id,
             @RequestBody WorkoutPlanDTO plan) {
         try {
@@ -44,12 +49,20 @@ public class WorkoutPrepController {
     }
 
     @PostMapping(value = "/create/partial/forUser/{id}")
-    public ResponseEntity<UsersWorkoutPlan> createPartialWorkoutPlan(
+    public ResponseEntity<UsersWorkoutPlanDTO> createPartialWorkoutPlan(
             @PathVariable Long id,
-            @RequestBody WorkoutPlanDTO plan) {
+            @RequestBody(required = false) WorkoutPlanDTO plan) {
         try {
             return ResponseEntity.ok(
-                    usersWorkoutPlanService.createUsersWorkoutPlan(id, workoutPlanService.createWorkoutPlan(plan))
+                    usersWorkoutPlanService.createUsersWorkoutPlan(
+                            id,
+                            plan.isNotEmpty() ? workoutPlanService.createWorkoutPlan(plan) :
+                                    workoutPlanService.createWorkoutPlan(WorkoutPlanDTO.getEmpty(
+                                            strings.getWorkoutPlanDefaultName(),
+                                            strings.getWorkoutPlanWeekDefaultName(),
+                                            strings.getWorkoutPlanWeekDayDefaultName()
+                                    ))
+                    )
             );
         } catch (UserNotFoundException | ExerciseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -123,5 +136,22 @@ public class WorkoutPrepController {
         }
     }
 
+    @GetMapping(value = "/get/user/{userId}/plans")
+    public ResponseEntity<List<UsersWorkoutPlanDTO>> getUsersWorkoutPlans(@PathVariable Long userId) {
+        return ResponseEntity.ok(usersWorkoutPlanService.getUserWorkoutPlans(userId));
+    }
 
+    @GetMapping(value = "/get/user/{userId}/plans/{planId}")
+    public ResponseEntity<UsersWorkoutPlanDTO> getUserWorkoutPlan(@PathVariable Long userId, @PathVariable Long planId) {
+        try {
+            return ResponseEntity.ok(usersWorkoutPlanService.getUserWorkoutPlan(userId, planId));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+//    @PostMapping(value = "/manage/userPlan/{id}/copy")
+//    public ResponseEntity<UsersWorkoutPlanDTO> copyUserPlan(@PathVariable Long id) {
+//        return ResponseEntity.ok(usersWorkoutPlanService.copy(id));
+//    }
 }

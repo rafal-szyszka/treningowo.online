@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
 
+    public static final String USER_NOT_FOUND_MSG = "User not found: %s";
+
     private final UserRepository repository;
     private final SubscriptionPlanService subscriptionPlanService;
     private final UserSubscriptionService userSubscriptionService;
@@ -33,6 +35,14 @@ public class UserService {
                 .map(this::updateAge)
                 .map(UserDTO::of)
                 .collect(Collectors.toList());
+    }
+
+    public UserDTO getUserById(Long id) throws NotFoundException {
+        return UserDTO.of(
+                repository.findById(id).orElseThrow(new NotFoundException(
+                        String.format(USER_NOT_FOUND_MSG, id)
+                ))
+        );
     }
 
     private User updateAge(User user) {
@@ -55,5 +65,10 @@ public class UserService {
         return userSubscriptionService.subscribe(
                 user, plan, LocalDate.now().plusDays(plan.getIntermittency())
         );
+    }
+
+    public UserSubscriptionDTO getUserActiveSubscriptions(Long id) throws UserNotFoundException {
+        User user = repository.findById(id).orElseThrow(new UserNotFoundException(id));
+        return userSubscriptionService.getUserActiveSubscriptions(user);
     }
 }

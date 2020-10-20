@@ -66,6 +66,12 @@ public class ActivityWeek {
         private String name;
         private List<ActivityDayDTO> activityDays;
 
+        public static ActivityWeekDTO getEmpty(String weekName, String dayName) {
+            return new ActivityWeekDTO(
+                    weekName,
+                    Collections.singletonList(ActivityDayDTO.getEmpty(dayName))
+            );
+        }
     }
 
     @Setter

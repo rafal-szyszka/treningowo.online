@@ -3,6 +3,7 @@ package com.prodactivv.app.core.user;
 import com.prodactivv.app.core.subscription.SubscriptionPlan;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -14,11 +15,13 @@ import java.util.List;
 public class UserSubscriptionDTO {
 
     private List<SubscriptionPlan> subscriptions;
+    private LocalDate until;
     private UserDTO user;
 
     public static UserSubscriptionDTO of(UserSubscription userSubscription) {
         return new UserSubscriptionDTO(
                 Collections.singletonList(userSubscription.getPlan()),
+                userSubscription.getUntil(),
                 UserDTO.of(userSubscription.getUser())
         );
     }

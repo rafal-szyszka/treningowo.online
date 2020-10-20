@@ -3,10 +3,7 @@ package com.prodactivv.app.admin.trainer.models;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.prodactivv.app.admin.trainer.models.DetailedExercise.*;
 
@@ -48,5 +45,11 @@ public class Workout {
         private String name;
         private List<DetailedExerciseDTO> exercises;
 
+        public static WorkoutDTO getEmpty(String name) {
+            return new WorkoutDTO(
+                    name,
+                    Collections.emptyList()
+            );
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.prodactivv.app.core.user;
 
-import com.prodactivv.app.core.subscription.SubscriptionPlan;
 import lombok.*;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -10,9 +9,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
@@ -44,6 +40,8 @@ public class User {
 
     private String sex;
 
+    private String role;
+
     public static User of(UserDTO userDto) {
         return User.builder()
                 .age(userDto.getAge())
@@ -54,16 +52,36 @@ public class User {
                 .birthday(userDto.getBirthday())
                 .signedUpDate(userDto.getSignedUpDate())
                 .sex(userDto.getSex())
+                .role(userDto.getRole())
                 .build();
     }
 
     @PrePersist
     public void hashPassword() throws NoSuchAlgorithmException {
-        MessageDigest digest = MessageDigest.getInstance("SHA-256");
+        MessageDigest digest = MessageDigest.getInstance("SHA-512");
         byte[] hash = digest.digest(
                 password.getBytes(StandardCharsets.UTF_8)
         );
         password = new String(Hex.encode(hash));
+    }
+
+    public enum Roles {
+        USER("user"), ADMIN("admin");
+
+        @Getter
+        private final String roleName;
+
+        Roles(String roleName) {
+            this.roleName = roleName;
+        }
+
+        public static boolean hasUserAccess(String role) {
+            return role.equalsIgnoreCase(ADMIN.getRoleName()) || role.equalsIgnoreCase(USER.getRoleName());
+        }
+
+        public static boolean hasAdminAccess(String role) {
+            return role.equalsIgnoreCase(ADMIN.getRoleName());
+        }
     }
 
 }

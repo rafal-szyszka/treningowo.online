@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(value = "/type")
+@RequestMapping(value = "/admin/type")
 public class TypeController {
 
     private final TypeService service;

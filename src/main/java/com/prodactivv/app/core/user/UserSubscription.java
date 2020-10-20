@@ -19,7 +19,7 @@ public class UserSubscription {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "subcription_plan_id")
+    @JoinColumn(name = "subscription_plan_id")
     private SubscriptionPlan plan;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -27,5 +27,8 @@ public class UserSubscription {
     private User user;
 
     private LocalDate until;
+
+    @Column(columnDefinition = "boolean DEFAULT true")
+    private Boolean isActive;
 
 }

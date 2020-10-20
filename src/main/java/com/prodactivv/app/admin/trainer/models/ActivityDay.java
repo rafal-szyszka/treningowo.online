@@ -5,13 +5,10 @@ import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExercise
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.prodactivv.app.admin.trainer.models.Workout.*;
+import static com.prodactivv.app.admin.trainer.models.Workout.WorkoutDTO;
 
 @Getter
 @Setter
@@ -84,6 +81,13 @@ public class ActivityDay {
         private String tips;
         private List<WorkoutDTO> workouts;
 
+        public static ActivityDayDTO getEmpty(String dayName) {
+            return new ActivityDayDTO(
+                    dayName,
+                    "",
+                    Collections.emptyList()
+            );
+        }
     }
 
     @Setter

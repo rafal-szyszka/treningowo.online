@@ -29,7 +29,7 @@ public class DetailedExercise {
 
     private String time;
 
-    @Column(length = 50000)
+    @Column(length = 20000)
     private String tips;
 
     @ManyToOne(fetch = FetchType.EAGER)

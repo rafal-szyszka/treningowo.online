@@ -21,6 +21,8 @@ public class UserDTO {
     private LocalDate birthday;
     private LocalDate signedUpDate;
     private String sex;
+    private String role;
+    private String token;
 
     @JsonIgnore @StrongPassword
     private String password;
@@ -35,6 +37,7 @@ public class UserDTO {
                 .birthday(user.getBirthday())
                 .signedUpDate(user.getSignedUpDate())
                 .sex(user.getSex())
+                .role(user.getRole())
                 .build();
     }
 }

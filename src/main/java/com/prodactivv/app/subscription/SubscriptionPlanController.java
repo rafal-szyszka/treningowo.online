@@ -10,7 +10,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 
 @RestController
-@RequestMapping(value = "/subscriptions")
 public class SubscriptionPlanController {
 
     private final SubscriptionPlanService service;
@@ -19,12 +18,12 @@ public class SubscriptionPlanController {
         this.service = service;
     }
 
-    @GetMapping
+    @GetMapping(value = "/public/subscriptions")
     public ResponseEntity<List<SubscriptionPlan>> getAll() {
         return ResponseEntity.ok(service.getAll());
     }
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/public/subscriptions/{id}")
     public ResponseEntity<SubscriptionPlan> getSingle(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(service.getSubscriptionPlanById(id));
@@ -33,7 +32,7 @@ public class SubscriptionPlanController {
         }
     }
 
-    @DeleteMapping(value = "/{id}")
+    @DeleteMapping(value = "/admin/subscriptions/{id}")
     public ResponseEntity<SubscriptionPlan> deleteSingle(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(service.deleteSubscriptionPlanById(id));
@@ -42,12 +41,12 @@ public class SubscriptionPlanController {
         }
     }
 
-    @PostMapping(value = "/create")
+    @PostMapping(value = "/admin/subscriptions/create")
     public ResponseEntity<SubscriptionPlan> create(@RequestBody SubscriptionPlan subscriptionPlan) {
         return ResponseEntity.ok(service.create(subscriptionPlan));
     }
 
-    @PutMapping(value = "/edit")
+    @PutMapping(value = "/admin/subscriptions/edit")
     public ResponseEntity<SubscriptionPlan> edit(@RequestBody SubscriptionPlan subscriptionPlan) {
         return ResponseEntity.ok(service.create(subscriptionPlan));
     }
