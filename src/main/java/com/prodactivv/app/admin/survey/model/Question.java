@@ -18,11 +18,13 @@ public class Question {
     @GeneratedValue
     private Long id;
 
+    @Column(columnDefinition = "TEXT", length = 10000)
     private String type;
 
+    @Column(columnDefinition = "TEXT", length = 10000)
     private String title;
 
-    @Column(length = 2048)
+    @Column(columnDefinition = "TEXT", length = 10000)
     private String options;
 
     @JsonIgnore

@@ -16,7 +16,7 @@ import static com.prodactivv.app.admin.trainer.models.Workout.WorkoutDTO;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityDay {
+public class ActivityDay implements Comparable<ActivityDay> {
 
     @Id
     @GeneratedValue
@@ -24,7 +24,7 @@ public class ActivityDay {
 
     private String name;
 
-    @Column(length = 10000)
+    @Column(columnDefinition = "TEXT", length = 10000)
     private String tips;
 
     @ManyToMany
@@ -71,6 +71,11 @@ public class ActivityDay {
         }
     }
 
+    @Override
+    public int compareTo(ActivityDay o) {
+        return id.compareTo(o.id);
+    }
+
     @Setter
     @Getter
     @AllArgsConstructor
@@ -100,6 +105,15 @@ public class ActivityDay {
         private String name;
         private String tips;
         private List<DetailedExerciseManagerDTO> exercises;
+
+        public static ActivityDayManagerDTO getEmpty(String name) {
+            return new ActivityDayManagerDTO(
+                    null,
+                    name,
+                    "",
+                    Collections.emptyList()
+            );
+        }
 
         public static ActivityDayManagerDTO of(ActivityDay activityDay) {
             return new ActivityDayManagerDTO(

@@ -2,17 +2,23 @@ package com.prodactivv.app.admin.survey.controller;
 
 import com.prodactivv.app.admin.survey.model.*;
 import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.files.DatabaseFile;
+import com.prodactivv.app.core.files.DatabaseFileService;
 import com.prodactivv.app.core.user.User;
 import com.prodactivv.app.core.user.UserRepository;
 import com.prodactivv.app.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.*;
 
 @Service
+@RequiredArgsConstructor
 public class QuestionnaireService {
 
     public static final String QUESTIONNAIRE_NOT_FOUND_MSG = "Questionnaire %s not found";
@@ -22,14 +28,7 @@ public class QuestionnaireService {
     private final QuestionnaireRepository repository;
     private final QuestionRepository questionRepository;
     private final QuestionnaireResultRepository questionnaireResultRepository;
-
-    public QuestionnaireService(AnswerService answerService, UserRepository userRepository, QuestionnaireRepository repository, QuestionRepository questionRepository, QuestionnaireResultRepository questionnaireResultRepository) {
-        this.answerService = answerService;
-        this.userRepository = userRepository;
-        this.repository = repository;
-        this.questionRepository = questionRepository;
-        this.questionnaireResultRepository = questionnaireResultRepository;
-    }
+    private final DatabaseFileService fileService;
 
     public Questionnaire createQuestionnaire(String name) {
         return repository.save(
@@ -75,5 +74,34 @@ public class QuestionnaireService {
         );
 
         return result;
+    }
+
+    public List<DatabaseFile> saveQuestionnaireFiles(Long id, MultipartFile[] files, Map<String, String> filesMap) throws NotFoundException, IOException {
+        QuestionnaireResult questionnaireResult = questionnaireResultRepository
+                .findById(id).orElseThrow(new NotFoundException(String.format("Questionnaire %s not found!", id)));
+
+        List<DatabaseFile> savedFiles = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            Long questionId = Long.valueOf(filesMap.get(file.getOriginalFilename()));
+            if (questionId != 0L) {
+                DatabaseFile savedFile = fileService.uploadFileToLocalStorage(file);
+                answerService.createAnswers(
+                        Collections.singletonList(
+                                new Answer.AnswerDto(
+                                        questionId,
+                                        "",
+                                        savedFile
+                                )
+                        ),
+                        questionnaireResult
+                );
+
+                savedFiles.add(savedFile);
+            }
+        }
+
+        return savedFiles;
+
     }
 }

@@ -83,7 +83,7 @@ public class WorkoutPlan {
             return new WorkoutPlanManagerDTO(
                     workoutPlan.id,
                     workoutPlan.name,
-                    workoutPlan.activityWeeks.stream()
+                    workoutPlan.activityWeeks.stream().sorted()
                             .map(ActivityWeekManagerDTO::of)
                             .filter(Optional::isPresent)
                             .map(Optional::get)

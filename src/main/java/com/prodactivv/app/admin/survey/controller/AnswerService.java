@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,19 +27,26 @@ public class AnswerService {
     public List<Answer> createAnswers(List<AnswerDto> answersDtos, QuestionnaireResult questionnaireResult) throws NotFoundException {
         List<Answer> list = new ArrayList<>();
         for (AnswerDto answersDto : answersDtos) {
-            Answer answer = createAnswer(answersDto, questionnaireResult);
-            Answer save = repository.save(answer);
-            list.add(save);
+            Optional<Answer> answer = createAnswer(answersDto, questionnaireResult);
+            if (answer.isPresent()) {
+                Answer save = repository.save(answer.get());
+                list.add(save);
+            }
         }
         return list;
     }
 
-    private Answer createAnswer(AnswerDto answerDto, QuestionnaireResult questionnaireResult) throws NotFoundException {
-        return Answer.builder()
-                .answer(answerDto.getAnswer())
-                .question(questionRepository.findById(answerDto.getQuestionId()).orElseThrow(NotFoundException::new))
-                .questionnaireResult(questionnaireResult)
-                .build();
+    private Optional<Answer> createAnswer(AnswerDto answerDto, QuestionnaireResult questionnaireResult) throws NotFoundException {
+        if (answerDto != null) {
+            return Optional.ofNullable(Answer.builder()
+                    .answer(answerDto.getAnswer())
+                    .question(questionRepository.findById(answerDto.getQuestionId()).orElseThrow(NotFoundException::new))
+                    .questionnaireResult(questionnaireResult)
+                    .file(answerDto.getFile())
+                    .build());
+        }
+
+        return Optional.empty();
     }
 
 }

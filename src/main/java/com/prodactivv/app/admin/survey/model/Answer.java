@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.survey.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.prodactivv.app.core.files.DatabaseFile;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,6 +25,10 @@ public class Answer {
     @Column(length = 2048)
     private String answer;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "file_id")
+    private DatabaseFile file;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "questionnaire_result_id")
@@ -33,8 +38,15 @@ public class Answer {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
+    @RequiredArgsConstructor
     public static class AnswerDto {
+
+        @NonNull
         private Long questionId;
+
+        @NonNull
         private String answer;
+
+        private DatabaseFile file;
     }
 }

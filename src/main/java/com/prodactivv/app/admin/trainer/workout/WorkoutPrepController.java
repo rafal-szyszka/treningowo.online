@@ -70,7 +70,7 @@ public class WorkoutPrepController {
     }
 
     @PostMapping(value = "/manage/plan/{id}/addNewActivityWeek")
-    public ResponseEntity<WorkoutPlanManagerDTO> addEmptyActivityWeekToUserPlan(
+    public ResponseEntity<ActivityWeekManagerDTO> addEmptyActivityWeekToUserPlan(
             @PathVariable Long id, @RequestBody ActivityWeekDTO activityWeekDTO
     ) {
         try {

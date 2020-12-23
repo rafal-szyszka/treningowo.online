@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.trainer.workout;
 
 import com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityWeek;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
@@ -38,12 +39,15 @@ public class WorkoutPlanService {
         return repository.save(plan);
     }
 
-    public WorkoutPlanManagerDTO addEmptyActivityWeekToUserPlan(Long id, ActivityWeekDTO activityWeekDTO) throws NotFoundException, ExerciseNotFoundException {
+    public ActivityWeekManagerDTO addEmptyActivityWeekToUserPlan(Long id, ActivityWeekDTO activityWeekDTO) throws NotFoundException, ExerciseNotFoundException {
         WorkoutPlan workoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format(WORKOUT_PLAN_NOT_FOUND_MSG, id)));
 
-        workoutPlan.addWorkoutWeek(activityService.createActivityWeek(activityWeekDTO));
+        ActivityWeek activityWeek = activityService.createActivityWeek(activityWeekDTO);
+        workoutPlan.addWorkoutWeek(activityWeek);
 
-        return WorkoutPlanManagerDTO.of(repository.save(workoutPlan));
+        repository.save(workoutPlan);
+
+        return ActivityWeekManagerDTO.of(activityWeek).orElseThrow(NotFoundException::new);
     }
 
     public ActivityWeekManagerDTO addEmptyActivityDayToActivityWeek(Long id, ActivityDayManagerDTO activityDayDTO) throws Exception {

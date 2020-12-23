@@ -56,6 +56,7 @@ public class DetailedExercise {
 
     @Setter
     @Getter
+    @Builder
     @AllArgsConstructor
     @NoArgsConstructor
     public static class DetailedExerciseDTO {

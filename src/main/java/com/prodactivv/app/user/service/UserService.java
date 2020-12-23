@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,7 +31,7 @@ public class UserService {
     }
 
     public List<UserDTO> getUsers() {
-        return repository.findAll()
+        return repository.findAllUsers()
                 .stream()
                 .map(this::updateAge)
                 .map(UserDTO::of)

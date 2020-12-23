@@ -15,7 +15,7 @@ import static com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayMan
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class ActivityWeek {
+public class ActivityWeek implements Comparable<ActivityWeek> {
 
     @Id
     @GeneratedValue
@@ -55,6 +55,11 @@ public class ActivityWeek {
         if (activityDays != null) {
             activityDays.clear();
         }
+    }
+
+    @Override
+    public int compareTo(ActivityWeek o) {
+        return id.compareTo(o.id);
     }
 
     @Setter
@@ -97,7 +102,7 @@ public class ActivityWeek {
 
         private static List<ActivityDayManagerDTO> getActivityDays(ActivityWeek activityWeek) {
             if (activityWeek.activityDays != null) {
-                return activityWeek.activityDays.stream()
+                return activityWeek.activityDays.stream().sorted()
                         .map(ActivityDayManagerDTO::of)
                         .collect(Collectors.toList());
             } else {

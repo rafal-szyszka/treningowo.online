@@ -34,6 +34,7 @@ public class UsersWorkoutPlanService {
         UsersWorkoutPlan plan = new UsersWorkoutPlan();
         plan.setUser(user);
         plan.setCreatedAt(LocalDate.now());
+        plan.setIsActive(true);
         if (workoutPlan != null) {
             plan.setWorkoutPlan(workoutPlan);
         }

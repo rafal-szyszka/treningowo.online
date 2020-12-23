@@ -4,14 +4,23 @@ import com.prodactivv.app.admin.survey.model.Questionnaire;
 import com.prodactivv.app.admin.survey.model.QuestionnaireResult;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.files.DatabaseFile;
 import com.prodactivv.app.core.security.JwtUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
-import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.QuestionnaireResultDto;
 
 @RestController
 @RequestMapping(value = "/user/questionnaire")
@@ -50,5 +59,18 @@ public class UserQuestionnaireController {
         } catch (DisintegratedJwsException | NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    @PostMapping("/{id}/files")
+    public ResponseEntity<List<DatabaseFile>> sendFiles(@PathVariable Long id, @RequestParam MultipartFile[] files, @RequestParam Map<String, String> filesMap) {
+
+        try {
+            return ResponseEntity.ok(
+                    service.saveQuestionnaireFiles(id, files, filesMap)
+            );
+        } catch (NotFoundException | IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+
     }
 }
