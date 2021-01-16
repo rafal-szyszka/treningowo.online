@@ -6,7 +6,6 @@ import com.prodactivv.app.core.files.DatabaseFile;
 import com.prodactivv.app.core.files.DatabaseFileService;
 import com.prodactivv.app.core.user.User;
 import com.prodactivv.app.core.user.UserRepository;
-import com.prodactivv.app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,7 +14,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
-import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.*;
+import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.QuestionnaireResultDto;
 
 @Service
 @RequiredArgsConstructor
@@ -51,7 +50,7 @@ public class QuestionnaireService {
     }
 
     public Questionnaire getQuestionnaire(Long id) throws NotFoundException {
-        return repository.findById(id).orElseThrow(NotFoundException::new);
+        return repository.findById(id).orElseThrow(new NotFoundException(String.format("Questionnaire %s not found!", id)));
     }
 
     public List<QuestionnaireResult> getQuestionnaireResultForUser(Long id, Long userId) {
@@ -59,8 +58,8 @@ public class QuestionnaireService {
     }
 
     public QuestionnaireResult submitQuestionnaire(Long id, QuestionnaireResultDto answers, Long userId) throws NotFoundException {
-        Questionnaire questionnaire = repository.findById(id).orElseThrow(NotFoundException::new);
-        User user = userRepository.findById(userId).orElseThrow(NotFoundException::new);
+        Questionnaire questionnaire = repository.findById(id).orElseThrow(new NotFoundException(String.format("Questionnaire %s not found!", id)));
+        User user = userRepository.findById(userId).orElseThrow(new NotFoundException(String.format("User %s not found!", userId)));
 
         QuestionnaireResult result = QuestionnaireResult.builder()
                 .dateTaken(LocalDate.now())
@@ -82,8 +81,12 @@ public class QuestionnaireService {
 
         List<DatabaseFile> savedFiles = new ArrayList<>();
 
+        System.out.printf("files: %s || filesMap: %s\n", files.length, filesMap.size());
+
         for (MultipartFile file : files) {
+            System.out.printf("file: %s\n", file.getOriginalFilename());
             Long questionId = Long.valueOf(filesMap.get(file.getOriginalFilename()));
+            System.out.printf("file: %s || question: %s\n", file.getOriginalFilename(), questionId);
             if (questionId != 0L) {
                 DatabaseFile savedFile = fileService.uploadFileToLocalStorage(file);
                 answerService.createAnswers(

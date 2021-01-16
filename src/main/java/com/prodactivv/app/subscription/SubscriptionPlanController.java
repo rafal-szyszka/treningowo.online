@@ -2,6 +2,7 @@ package com.prodactivv.app.subscription;
 
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.subscription.SubscriptionPlan;
+import com.prodactivv.app.core.subscription.SubscriptionPlan.SubscriptionPlanDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,13 +43,21 @@ public class SubscriptionPlanController {
     }
 
     @PostMapping(value = "/admin/subscriptions/create")
-    public ResponseEntity<SubscriptionPlan> create(@RequestBody SubscriptionPlan subscriptionPlan) {
-        return ResponseEntity.ok(service.create(subscriptionPlan));
+    public ResponseEntity<SubscriptionPlan> create(@RequestBody SubscriptionPlanDto subscriptionPlan) {
+        try {
+            return ResponseEntity.ok(service.create(subscriptionPlan));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @PutMapping(value = "/admin/subscriptions/edit")
-    public ResponseEntity<SubscriptionPlan> edit(@RequestBody SubscriptionPlan subscriptionPlan) {
-        return ResponseEntity.ok(service.create(subscriptionPlan));
+    public ResponseEntity<SubscriptionPlan> edit(@RequestBody SubscriptionPlanDto subscriptionPlan) {
+        try {
+            return ResponseEntity.ok(service.create(subscriptionPlan));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
 }

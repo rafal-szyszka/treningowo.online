@@ -42,8 +42,10 @@ public class ActivityService {
             activityDay.setName(activityDayDTO.getName());
             activityDay.setTips(activityDayDTO.getTips());
 
-            for (WorkoutDTO workoutDTO : activityDayDTO.getWorkouts()) {
-                activityDay.addWorkout(workoutService.createWorkout(workoutDTO));
+            if (activityDayDTO.getWorkouts() != null) {
+                for (WorkoutDTO workoutDTO : activityDayDTO.getWorkouts()) {
+                    activityDay.addWorkout(workoutService.createWorkout(workoutDTO));
+                }
             }
 
             return Optional.of(repository.save(activityDay));
@@ -107,6 +109,14 @@ public class ActivityService {
         ActivityDay activityDay = repository.findById(id).orElseThrow(new NotFoundException(String.format(ACTIVITY_DAY_NOT_FOUND_MSG, id)));
 
         activityDay.addDetailedExercise(exerciseService.provideDetails(exerciseDTO));
+
+        return repository.save(activityDay);
+    }
+
+    public ActivityDay addExerciseToActivityDay(Long id, Long detailedExerciseId) throws NotFoundException, ExerciseNotFoundException {
+        ActivityDay activityDay = repository.findById(id).orElseThrow(new NotFoundException(String.format(ACTIVITY_DAY_NOT_FOUND_MSG, id)));
+
+        activityDay.addDetailedExercise(exerciseService.getDetailedExercise(detailedExerciseId));
 
         return repository.save(activityDay);
     }

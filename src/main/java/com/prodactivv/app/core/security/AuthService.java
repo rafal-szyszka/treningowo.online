@@ -6,6 +6,7 @@ import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.user.User;
 import com.prodactivv.app.core.user.UserDTO;
 import com.prodactivv.app.core.user.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,11 @@ public class AuthService {
 
     private final UserRepository repository;
     private final TokenValidityService tokenValidityService;
+
+    @Value("${app.security.access.control.user-level.url.prefix}")
+    private String accessControlUserLevelUrlPrefix;
+    @Value("${app.security.access.control.admin-level.url.prefix}")
+    private String accessControlAdminLevelUrlPrefix;
 
     public AuthService(UserRepository repository, TokenValidityService tokenValidityService) {
         this.repository = repository;
@@ -70,12 +76,12 @@ public class AuthService {
     }
 
     public boolean hasUserLevelAccess(String token, String url) throws NotFoundException {
-        return url.startsWith("/user")
+        return url.startsWith(accessControlUserLevelUrlPrefix)
                 && tokenValidityService.hasUserLevelAccess(tokenValidityService.getTokenValidity(token));
     }
 
     public boolean hasAdminLevelAccess(String token, String url) throws NotFoundException {
-        return url.startsWith("/admin")
+        return url.startsWith(accessControlAdminLevelUrlPrefix)
                 && tokenValidityService.hasAdminLevelAccess(tokenValidityService.getTokenValidity(token));
     }
 

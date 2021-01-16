@@ -5,7 +5,6 @@ import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExercise
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanDTO;
-import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanManagerDTO;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
 import com.prodactivv.app.config.Strings;
 import com.prodactivv.app.core.exceptions.NotFoundException;
@@ -17,7 +16,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-import static com.prodactivv.app.admin.trainer.models.ActivityWeek.*;
+import static com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
+import static com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
 
 @RestController
 @RequestMapping(value = "/admin/workout")
@@ -103,6 +103,19 @@ public class WorkoutPrepController {
         try {
             return ResponseEntity.ok(
                     workoutPlanService.addExerciseToActivityDay(id, exerciseDTO)
+            );
+        } catch (NotFoundException | ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PostMapping(value = "/manage/plan/activityDay/{id}/addNewExerciseById")
+    public ResponseEntity<ActivityDayManagerDTO> addExerciseToActivityDayById(
+            @PathVariable Long id, @RequestParam Long deId
+    ) {
+        try {
+            return ResponseEntity.ok(
+                    workoutPlanService.addExerciseToActivityDay(id, deId)
             );
         } catch (NotFoundException | ExerciseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);

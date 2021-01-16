@@ -68,6 +68,7 @@ public class TokenValidityService {
     public boolean isTokenValid(String token) throws NotFoundException {
         boolean isTrusted = jwtUtils.checkJwsIntegrity(token);
         TokenValidity tokenValidity = getTokenValidity(token);
+        System.out.println(String.format("is trusted: %s || is valid: %s || now: %s", isTrusted, tokenValidity.getUntil(), LocalDateTime.now()));
         return isTrusted && LocalDateTime.now().isBefore(tokenValidity.getUntil());
     }
 }

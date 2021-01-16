@@ -1,21 +1,11 @@
 package com.prodactivv.app;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prodactivv.app.core.definedmodels.definition.*;
-import com.prodactivv.app.core.definedmodels.instances.AttributeInstanceRepository;
-import com.prodactivv.app.core.definedmodels.instances.TypeInstanceRepository;
-import com.prodactivv.app.core.definedmodels.instances.PrimitiveInstanceRepository;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.context.annotation.Bean;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
 @SpringBootApplication
-public class Application {
+public class Application extends SpringBootServletInitializer {
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

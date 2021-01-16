@@ -66,7 +66,7 @@ public class DatabaseFileService {
     private DatabaseFile createDatabaseFile(Path path, String type) {
         DatabaseFile databaseFile = DatabaseFile.builder()
                 .fileLocationType(type)
-                .fileLocation(path.toAbsolutePath().toString())
+                .fileLocation(String.format("%s%s", databaseFiles.getFilePublicAddress(), path.getFileName().toString()))
                 .fileName(path.getFileName().toString())
                 .build();
 

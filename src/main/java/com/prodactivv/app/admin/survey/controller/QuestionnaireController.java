@@ -21,7 +21,7 @@ public class QuestionnaireController {
         this.service = service;
     }
 
-    @GetMapping
+    @PostMapping
     public ResponseEntity<Questionnaire> createQuestionnaire(@RequestParam String name) {
         return ResponseEntity.ok(service.createQuestionnaire(name));
     }

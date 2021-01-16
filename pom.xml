@@ -9,17 +9,24 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.prodactivv</groupId>
-    <artifactId>app</artifactId>
-    <version>0.0.0</version>
-    <name>app</name>
+    <artifactId>prodactivv_backed</artifactId>
+    <name>prodactivv_backed</name>
+    <version>0.0.0-alpha</version>
+    <packaging>war</packaging>
     <description>Prodactivv App</description>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
         <jjwt-version>0.11.1</jjwt-version>
         <google-api-client-version>1.30.11</google-api-client-version>
         <google-api-oauth-version>1.31.1</google-api-oauth-version>
         <google-api-drive-version>v3-rev197-1.25.0</google-api-drive-version>
+        <springfox-swagger2-version>2.6.1</springfox-swagger2-version>
+        <jackson-core-version>2.11.0</jackson-core-version>
+        <passay-version>1.6.0</passay-version>
+        <bcprov-jdk15on-version>1.65</bcprov-jdk15on-version>
+        <h2-version>1.4.200</h2-version>
+        <mockito-all-version>1.10.19</mockito-all-version>
     </properties>
 
     <dependencies>
@@ -62,17 +69,17 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.11.0</version>
+            <version>${jackson-core-version}</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger2</artifactId>
-            <version>2.6.1</version>
+            <version>${springfox-swagger2-version}</version>
         </dependency>
         <dependency>
             <groupId>io.springfox</groupId>
             <artifactId>springfox-swagger-ui</artifactId>
-            <version>2.6.1</version>
+            <version>${springfox-swagger2-version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -105,24 +112,24 @@
         <dependency>
             <groupId>org.passay</groupId>
             <artifactId>passay</artifactId>
-            <version>1.6.0</version>
+            <version>${passay-version}</version>
         </dependency>
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk15on</artifactId>
-            <version>1.65</version>
+            <version>${bcprov-jdk15on-version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
-            <version>1.4.200</version>
+            <version>${h2-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <version>1.10.19</version>
+            <version>${mockito-all-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -143,6 +150,7 @@
     </dependencies>
 
     <build>
+        <finalName>prodactivv_backend</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

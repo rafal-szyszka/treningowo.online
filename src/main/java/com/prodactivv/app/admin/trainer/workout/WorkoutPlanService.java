@@ -7,13 +7,12 @@ import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerD
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanDTO;
-import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanManagerDTO;
-import com.prodactivv.app.admin.trainer.models.repositories.WorkoutPlanRepository;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
+import com.prodactivv.app.admin.trainer.models.repositories.WorkoutPlanRepository;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import org.springframework.stereotype.Service;
 
-import static com.prodactivv.app.admin.trainer.models.DetailedExercise.*;
+import static com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
 
 @Service
 public class WorkoutPlanService {
@@ -56,6 +55,10 @@ public class WorkoutPlanService {
 
     public ActivityDayManagerDTO addExerciseToActivityDay(Long id, DetailedExerciseDTO exerciseDTO) throws NotFoundException, ExerciseNotFoundException {
         return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, exerciseDTO));
+    }
+
+    public ActivityDayManagerDTO addExerciseToActivityDay(Long id, Long detailedExerciseId) throws NotFoundException, ExerciseNotFoundException {
+        return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, detailedExerciseId));
     }
 
     public ActivityWeekManagerDTO removeActivityWeekFromUserPlan(Long id) throws NotFoundException {

@@ -1,30 +1,38 @@
 package com.prodactivv.app.subscription;
 
+import com.prodactivv.app.admin.survey.controller.QuestionnaireService;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.subscription.SubscriptionPlan;
+import com.prodactivv.app.core.subscription.SubscriptionPlan.SubscriptionPlanDto;
 import com.prodactivv.app.core.subscription.SubscriptionPlanRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class SubscriptionPlanService {
 
     public static final String EXCEPTION_NOT_FOUND_MSG = "Subscription plan not found. ID: %s";
 
     private final SubscriptionPlanRepository repository;
-
-    public SubscriptionPlanService(SubscriptionPlanRepository repository) {
-        this.repository = repository;
-    }
+    private final QuestionnaireService questionnaireService;
 
     public SubscriptionPlan getSubscriptionPlanById(Long id) throws NotFoundException {
         return repository.findById(id)
                 .orElseThrow(new NotFoundException(String.format(EXCEPTION_NOT_FOUND_MSG, id)));
     }
 
-    public SubscriptionPlan create(SubscriptionPlan subscriptionPlan) {
-        return repository.save(subscriptionPlan);
+    public SubscriptionPlan create(SubscriptionPlanDto subscriptionPlanDto) throws NotFoundException {
+        SubscriptionPlan plan = subscriptionPlanDto.cast();
+        if (subscriptionPlanDto.getDietaryQuestionnaireId() != null) {
+            plan.setDietaryQuestionnaire(questionnaireService.getQuestionnaire(subscriptionPlanDto.getDietaryQuestionnaireId()));
+        }
+        if (subscriptionPlanDto.getTrainingQuestionnaireId() != null) {
+            plan.setTrainingQuestionnaire(questionnaireService.getQuestionnaire(subscriptionPlanDto.getTrainingQuestionnaireId()));
+        }
+        return repository.save(plan);
     }
 
     public List<SubscriptionPlan> getAll() {
