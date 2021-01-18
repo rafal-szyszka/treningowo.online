@@ -4,6 +4,7 @@ import com.prodactivv.app.admin.survey.model.Questionnaire;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -35,6 +36,14 @@ public class SubscriptionPlan {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "training_questionnaire_id", referencedColumnName = "id")
     private Questionnaire trainingQuestionnaire;
+
+    public Optional<Questionnaire> getDietaryQuestionnaire() {
+        return Optional.ofNullable(dietaryQuestionnaire);
+    }
+
+    public Optional<Questionnaire> getTrainingQuestionnaire() {
+        return Optional.ofNullable(trainingQuestionnaire);
+    }
 
     @Getter
     @Setter

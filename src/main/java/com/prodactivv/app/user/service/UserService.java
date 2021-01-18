@@ -1,5 +1,6 @@
 package com.prodactivv.app.user.service;
 
+import com.prodactivv.app.admin.survey.model.Questionnaire;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.core.subscription.SubscriptionPlan;
@@ -8,11 +9,13 @@ import com.prodactivv.app.core.user.UserDTO;
 import com.prodactivv.app.core.user.UserRepository;
 import com.prodactivv.app.core.user.UserSubscriptionDTO;
 import com.prodactivv.app.subscription.SubscriptionPlanService;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.ListIterator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,11 +42,13 @@ public class UserService {
     }
 
     public UserDTO getUserById(Long id) throws NotFoundException {
-        return UserDTO.of(
-                repository.findById(id).orElseThrow(new NotFoundException(
-                        String.format(USER_NOT_FOUND_MSG, id)
-                ))
-        );
+        return UserDTO.of(getUser(id));
+    }
+
+    public User getUser(Long id) throws NotFoundException {
+        return repository.findById(id).orElseThrow(new NotFoundException(
+                String.format(USER_NOT_FOUND_MSG, id)
+        ));
     }
 
     private User updateAge(User user) {
@@ -71,5 +76,20 @@ public class UserService {
     public UserSubscriptionDTO getUserActiveSubscriptions(Long id) throws UserNotFoundException {
         User user = repository.findById(id).orElseThrow(new UserNotFoundException(id));
         return userSubscriptionService.getUserActiveSubscriptions(user);
+    }
+
+    public List<Pair<Long, String>> getPlanQuestionnaires(Long userId) throws NotFoundException, UserNotFoundException {
+        UserSubscriptionDTO subscription = userSubscriptionService.getUserActiveSubscriptions(getUser(userId));
+
+        SubscriptionPlan subPlan = subscriptionPlanService.getSubscriptionPlanById(subscription.getSubscriptions().get(0).getId());
+        Optional<Questionnaire> dietaryQuestionnaire = subPlan.getDietaryQuestionnaire();
+        Optional<Questionnaire> trainingQuestionnaire = subPlan.getTrainingQuestionnaire();
+
+        List<Pair<Long, String>> ids = new ArrayList<>();
+
+        dietaryQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
+        trainingQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
+
+        return ids;
     }
 }
