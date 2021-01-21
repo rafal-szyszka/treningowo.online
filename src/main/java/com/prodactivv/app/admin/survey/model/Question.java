@@ -27,6 +27,9 @@ public class Question {
     @Column(columnDefinition = "TEXT", length = 10000)
     private String options;
 
+    @Column(columnDefinition = "BIGINT(20) DEFAULT 0")
+    private Long mandatory;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "questionnaire_id")

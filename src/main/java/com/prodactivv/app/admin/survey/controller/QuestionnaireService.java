@@ -49,6 +49,25 @@ public class QuestionnaireService {
         return repository.save(questionnaire);
     }
 
+    public Question editQuestion(Question question, Long questionId) throws NotFoundException {
+        Question editable = getQuestion(questionId);
+        editable.setTitle(question.getTitle());
+        editable.setOptions(question.getOptions());
+        editable.setType(question.getType());
+        editable.setMandatory(question.getMandatory());
+
+        return questionRepository.save(editable);
+    }
+
+    public Question getQuestion(Long questionId) throws NotFoundException {
+        return questionRepository.findById(questionId).orElseThrow(new NotFoundException(String.format("Question %s not found!", questionId)));
+    }
+
+    public void deleteQuestion(Long questionId) throws NotFoundException {
+        Question question = questionRepository.findById(questionId).orElseThrow(new NotFoundException(String.format("Question %s not found!", questionId)));
+        questionRepository.delete(question);
+    }
+
     public Questionnaire getQuestionnaire(Long id) throws NotFoundException {
         return repository.findById(id).orElseThrow(new NotFoundException(String.format("Questionnaire %s not found!", id)));
     }
@@ -81,12 +100,9 @@ public class QuestionnaireService {
 
         List<DatabaseFile> savedFiles = new ArrayList<>();
 
-        System.out.printf("files: %s || filesMap: %s\n", files.length, filesMap.size());
 
         for (MultipartFile file : files) {
-            System.out.printf("file: %s\n", file.getOriginalFilename());
             Long questionId = Long.valueOf(filesMap.get(file.getOriginalFilename()));
-            System.out.printf("file: %s || question: %s\n", file.getOriginalFilename(), questionId);
             if (questionId != 0L) {
                 DatabaseFile savedFile = fileService.uploadFileToLocalStorage(file);
                 answerService.createAnswers(

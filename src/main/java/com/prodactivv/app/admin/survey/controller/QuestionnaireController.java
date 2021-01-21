@@ -35,6 +35,35 @@ public class QuestionnaireController {
         }
     }
 
+    @GetMapping(value = "/question/{questionId}")
+    public ResponseEntity<Question> getQuestion(@PathVariable Long questionId) {
+        try {
+            return ResponseEntity.ok(service.getQuestion(questionId));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/question/{questionId}")
+    public ResponseEntity<Question> editQuestion(@RequestBody Question question, @PathVariable Long questionId) {
+        try {
+            return ResponseEntity.ok(service.editQuestion(question, questionId));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @DeleteMapping(value = "/question/{questionId}")
+    public ResponseEntity<Long> deleteQuestion(@PathVariable Long questionId) {
+        try {
+            service.deleteQuestion(questionId);
+            return ResponseEntity.ok(questionId);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+
+    }
+
     @GetMapping(value = "/{id}/user/{userId}")
     public ResponseEntity<List<QuestionnaireResult>> getQuestionnaireResultForUser(@PathVariable Long id, @PathVariable Long userId) {
         return ResponseEntity.ok(service.getQuestionnaireResultForUser(id, userId));
