@@ -96,26 +96,26 @@ public class WorkoutPrepController {
         }
     }
 
-    @PostMapping(value = "/manage/plan/activityDay/{id}/addNewExercise")
+    @PostMapping(value = "/manage/plan/activityDay/{id}/addNewExercise/{order}")
     public ResponseEntity<ActivityDayManagerDTO> addExerciseToActivityDay(
-            @PathVariable Long id, @RequestBody DetailedExerciseDTO exerciseDTO
+            @PathVariable Long id, @RequestBody DetailedExerciseDTO exerciseDTO, @PathVariable Long order
     ) {
         try {
             return ResponseEntity.ok(
-                    workoutPlanService.addExerciseToActivityDay(id, exerciseDTO)
+                    workoutPlanService.addExerciseToActivityDay(id, exerciseDTO, order)
             );
         } catch (NotFoundException | ExerciseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 
-    @PostMapping(value = "/manage/plan/activityDay/{id}/addNewExerciseById")
+    @PostMapping(value = "/manage/plan/activityDay/{id}/addNewExerciseById/{order}")
     public ResponseEntity<ActivityDayManagerDTO> addExerciseToActivityDayById(
-            @PathVariable Long id, @RequestParam Long deId
+            @PathVariable Long id, @RequestParam Long deId, @PathVariable(required = false) Long order
     ) {
         try {
             return ResponseEntity.ok(
-                    workoutPlanService.addExerciseToActivityDay(id, deId)
+                    workoutPlanService.addExerciseToActivityDay(id, deId, order)
             );
         } catch (NotFoundException | ExerciseNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
@@ -163,8 +163,12 @@ public class WorkoutPrepController {
         }
     }
 
-//    @PostMapping(value = "/manage/userPlan/{id}/copy")
-//    public ResponseEntity<UsersWorkoutPlanDTO> copyUserPlan(@PathVariable Long id) {
-//        return ResponseEntity.ok(usersWorkoutPlanService.copy(id));
-//    }
+    @PutMapping(value = "/manage/plan/activityDay/{id}/setTips")
+    public ResponseEntity<ActivityDayManagerDTO> setTips(@PathVariable Long id, @RequestBody String tips) {
+        try {
+            return ResponseEntity.ok(workoutPlanService.setActivityDayTips(id, tips));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

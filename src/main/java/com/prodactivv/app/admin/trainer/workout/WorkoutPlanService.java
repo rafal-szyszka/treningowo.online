@@ -53,12 +53,12 @@ public class WorkoutPlanService {
         return ActivityWeekManagerDTO.of(activityService.addActivityDayToActivityWeek(id, activityDayDTO)).orElseThrow(Exception::new);
     }
 
-    public ActivityDayManagerDTO addExerciseToActivityDay(Long id, DetailedExerciseDTO exerciseDTO) throws NotFoundException, ExerciseNotFoundException {
-        return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, exerciseDTO));
+    public ActivityDayManagerDTO addExerciseToActivityDay(Long id, DetailedExerciseDTO exerciseDTO, Long order) throws NotFoundException, ExerciseNotFoundException {
+        return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, exerciseDTO, order));
     }
 
-    public ActivityDayManagerDTO addExerciseToActivityDay(Long id, Long detailedExerciseId) throws NotFoundException, ExerciseNotFoundException {
-        return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, detailedExerciseId));
+    public ActivityDayManagerDTO addExerciseToActivityDay(Long id, Long detailedExerciseId, Long order) throws NotFoundException, ExerciseNotFoundException {
+        return ActivityDayManagerDTO.of(activityService.addExerciseToActivityDay(id, detailedExerciseId, order));
     }
 
     public ActivityWeekManagerDTO removeActivityWeekFromUserPlan(Long id) throws NotFoundException {
@@ -71,5 +71,9 @@ public class WorkoutPlanService {
 
     public DetailedExerciseManagerDTO removeExerciseFromActivityDay(Long id) throws ExerciseNotFoundException {
         return activityService.removeExerciseFromActivityDay(id);
+    }
+
+    public ActivityDayManagerDTO setActivityDayTips(Long id, String tips) throws NotFoundException {
+        return activityService.setActivityDayTips(id, tips);
     }
 }

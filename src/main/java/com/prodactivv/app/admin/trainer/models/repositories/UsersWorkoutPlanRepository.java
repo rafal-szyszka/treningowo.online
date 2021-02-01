@@ -1,7 +1,6 @@
 package com.prodactivv.app.admin.trainer.models.repositories;
 
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
-import com.prodactivv.app.core.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

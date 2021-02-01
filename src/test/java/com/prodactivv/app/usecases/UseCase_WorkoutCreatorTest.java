@@ -23,7 +23,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.HashSet;
-import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -161,7 +160,8 @@ public class UseCase_WorkoutCreatorTest {
                         .time("N/D")
                         .tips("N/D")
                         .weight("45KG")
-                        .build()
+                        .build(),
+                0L
         );
 
         assertEquals(dayId, activityDayManagerDTO.getId());

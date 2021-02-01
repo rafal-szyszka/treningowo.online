@@ -2,7 +2,6 @@ package com.prodactivv.app.admin.trainer.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDatSuperExerciseManagerDto;
-import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,6 +35,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
     private Set<Workout> workouts;
 
     @OneToMany(mappedBy = "activityDay")
+    @OrderBy("exerciseOrder ASC")
     private List<ActivityDaySuperExercise> superExercises;
 
     @JsonIgnore
