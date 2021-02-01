@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.trainer.models;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import lombok.*;
 
@@ -29,6 +30,7 @@ public class Exercise {
 
     private String section;
 
+    @JsonIgnore
     @OneToMany(
             mappedBy = "exercise",
             cascade = CascadeType.ALL,

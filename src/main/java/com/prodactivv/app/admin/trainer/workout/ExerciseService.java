@@ -3,23 +3,21 @@ package com.prodactivv.app.admin.trainer.workout;
 import com.prodactivv.app.admin.trainer.models.*;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
+import com.prodactivv.app.admin.trainer.models.repositories.ActivityDaySuperExerciseRepository;
 import com.prodactivv.app.admin.trainer.models.repositories.DetailedExerciseRepository;
 import com.prodactivv.app.admin.trainer.models.repositories.ExerciseRepository;
-import com.prodactivv.app.core.exceptions.NotFoundException;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
+@AllArgsConstructor
 public class ExerciseService {
 
     private final ExerciseRepository repository;
     private final DetailedExerciseRepository detailedExerciseRepository;
-
-    public ExerciseService(ExerciseRepository repository, DetailedExerciseRepository detailedExerciseRepository) {
-        this.repository = repository;
-        this.detailedExerciseRepository = detailedExerciseRepository;
-    }
+    private final ActivityDaySuperExerciseRepository superExerciseRepository;
 
     public Exercise createExercise(Exercise exercise) {
         return repository.save(exercise);
@@ -56,9 +54,23 @@ public class ExerciseService {
     }
 
     public DetailedExercise deleteDetailedExercise(Long id) throws ExerciseNotFoundException {
-        DetailedExercise detailedExercise = detailedExerciseRepository.findById(id).orElseThrow(new ExerciseNotFoundException(id));
+        ActivityDaySuperExercise superExercise = superExerciseRepository.findById(id).orElseThrow(new ExerciseNotFoundException(id));
+
+        ActivityDay activityDay = superExercise.getActivityDay();
+        activityDay.deleteSuperExercise(superExercise);
+
+        DetailedExercise detailedExercise = superExercise.getDetailedExercise();
+        detailedExercise.deleteActivityDaySuperExercise(superExercise);
+
+        superExerciseRepository.delete(superExercise);
         detailedExerciseRepository.delete(detailedExercise);
+
         detailedExercise.setId(-1L);
         return detailedExercise;
+    }
+
+    public List<Exercise> searchExercisesByKey(String key) {
+        key = key.replaceAll(" ", "%");
+        return repository.searchByKey(key);
     }
 }

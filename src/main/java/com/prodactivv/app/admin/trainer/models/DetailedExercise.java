@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -40,9 +39,15 @@ public class DetailedExercise {
     @JsonIgnore
     private Set<Workout> workouts;
 
-    @ManyToMany(mappedBy = "superExercises")
+    @OneToMany(mappedBy = "detailedExercise")
     @JsonIgnore
-    private Set<ActivityDay> superDays;
+    private Set<ActivityDaySuperExercise> superDays;
+
+    public void deleteActivityDaySuperExercise(ActivityDaySuperExercise superExercise) {
+        if (superDays != null) {
+            superDays.remove(superExercise);
+        }
+    }
 
     public DetailedExercise(DetailedExerciseDTO detailedExerciseDTO, Exercise exercise) {
         this.setCount = detailedExerciseDTO.getSetCount();
@@ -61,6 +66,7 @@ public class DetailedExercise {
     @NoArgsConstructor
     public static class DetailedExerciseDTO {
 
+        protected Long id;
         protected Integer setCount;
         protected Integer perSetCount;
         protected String weight;
@@ -71,6 +77,7 @@ public class DetailedExercise {
 
         public static DetailedExerciseDTO of(DetailedExercise detailedExercise) {
             return new DetailedExerciseDTO(
+                    detailedExercise.id,
                     detailedExercise.setCount,
                     detailedExercise.perSetCount,
                     detailedExercise.weight,
@@ -88,9 +95,9 @@ public class DetailedExercise {
     @AllArgsConstructor
     public static class DetailedExerciseManagerDTO extends DetailedExerciseDTO {
 
-        private String name;
-        private String videoUrl;
-        private String description;
+        protected String name;
+        protected String videoUrl;
+        protected String description;
 
         public static DetailedExerciseManagerDTO of (DetailedExercise detailedExercise) {
             DetailedExerciseManagerDTO simpleDTO = new DetailedExerciseManagerDTO(
@@ -99,6 +106,7 @@ public class DetailedExercise {
                     detailedExercise.exercise.getDescription()
             );
 
+            simpleDTO.id = detailedExercise.id;
             simpleDTO.setCount = detailedExercise.setCount;
             simpleDTO.perSetCount = detailedExercise.perSetCount;
             simpleDTO.weight = detailedExercise.weight;

@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.trainer.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDatSuperExerciseManagerDto;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
 import lombok.*;
 
@@ -34,12 +35,8 @@ public class ActivityDay implements Comparable<ActivityDay> {
             inverseJoinColumns = @JoinColumn(name = "workout_id"))
     private Set<Workout> workouts;
 
-    @ManyToMany
-    @JoinTable(
-            name = "activity_day_super_exercies",
-            joinColumns = @JoinColumn(name = "activity_day_id"),
-            inverseJoinColumns = @JoinColumn(name = "detailed_exercise_id"))
-    private Set<DetailedExercise> superExercises;
+    @OneToMany(mappedBy = "activityDay")
+    private List<ActivityDaySuperExercise> superExercises;
 
     @JsonIgnore
     @ManyToMany(mappedBy = "activityDays")
@@ -53,12 +50,18 @@ public class ActivityDay implements Comparable<ActivityDay> {
         workouts.add(workout);
     }
 
-    public void addDetailedExercise(DetailedExercise detailedExercise) {
+    public void addDetailedExercise(ActivityDaySuperExercise detailedExercise) {
         if (superExercises == null) {
-            superExercises = new HashSet<>();
+            superExercises = new ArrayList<>();
         }
 
         superExercises.add(detailedExercise);
+    }
+
+    public void deleteSuperExercise(ActivityDaySuperExercise detailedExercise) {
+        if (superExercises != null) {
+            superExercises.remove(detailedExercise);
+        }
     }
 
     public void delete() {
@@ -104,7 +107,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
         private Long id;
         private String name;
         private String tips;
-        private List<DetailedExerciseManagerDTO> exercises;
+        private List<ActivityDatSuperExerciseManagerDto> exercises;
 
         public static ActivityDayManagerDTO getEmpty(String name) {
             return new ActivityDayManagerDTO(
@@ -124,10 +127,10 @@ public class ActivityDay implements Comparable<ActivityDay> {
             );
         }
 
-        private static List<DetailedExerciseManagerDTO> getExercises(ActivityDay activityDay) {
+        private static List<ActivityDatSuperExerciseManagerDto> getExercises(ActivityDay activityDay) {
             if (activityDay.superExercises != null) {
                 return activityDay.superExercises.stream()
-                        .map(DetailedExerciseManagerDTO::of)
+                        .map(ActivityDatSuperExerciseManagerDto::of)
                         .collect(Collectors.toList());
             } else {
                 return new ArrayList<>();

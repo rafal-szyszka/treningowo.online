@@ -4,13 +4,13 @@ import com.prodactivv.app.admin.trainer.models.DetailedExercise;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.Exercise;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
-import com.prodactivv.app.core.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/admin/exercises")
@@ -84,5 +84,10 @@ public class ExerciseController {
     @GetMapping
     public ResponseEntity<List<Exercise>> getAllExercises() {
         return ResponseEntity.ok(exerciseService.getExercises());
+    }
+
+    @GetMapping(value = "/search/{key}")
+    public ResponseEntity<List<Exercise>> searchExercisesByKey(@PathVariable String key) {
+        return ResponseEntity.ok(exerciseService.searchExercisesByKey(key));
     }
 }
