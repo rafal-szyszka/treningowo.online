@@ -20,9 +20,13 @@ public class DetailedExercise {
 
     private Integer setCount;
 
-    private Integer perSetCount;
+    private String perSetCount;
+
+    private String restBetweenSets;
 
     private String weight;
+
+    private String rir;
 
     private String pace;
 
@@ -52,11 +56,24 @@ public class DetailedExercise {
     public DetailedExercise(DetailedExerciseDTO detailedExerciseDTO, Exercise exercise) {
         this.setCount = detailedExerciseDTO.getSetCount();
         this.perSetCount = detailedExerciseDTO.getPerSetCount();
+        this.restBetweenSets = detailedExerciseDTO.getRestBetweenSets();
         this.weight = detailedExerciseDTO.getWeight();
+        this.rir = detailedExerciseDTO.getRir();
         this.pace = detailedExerciseDTO.getPace();
         this.time = detailedExerciseDTO.getTime();
         this.tips = detailedExerciseDTO.getTips();
         this.exercise = exercise;
+    }
+
+    public void update(DetailedExerciseDTO detailedExerciseDTO) {
+        this.setCount = detailedExerciseDTO.setCount;
+        this.perSetCount = detailedExerciseDTO.perSetCount;
+        this.restBetweenSets = detailedExerciseDTO.restBetweenSets;
+        this.weight = detailedExerciseDTO.weight;
+        this.rir = detailedExerciseDTO.rir;
+        this.pace = detailedExerciseDTO.pace;
+        this.time = detailedExerciseDTO.time;
+        this.tips = detailedExerciseDTO.tips;
     }
 
     @Setter
@@ -68,8 +85,10 @@ public class DetailedExercise {
 
         protected Long id;
         protected Integer setCount;
-        protected Integer perSetCount;
+        protected String perSetCount;
+        protected String restBetweenSets;
         protected String weight;
+        protected String rir;
         protected String pace;
         protected String time;
         protected String tips;
@@ -80,7 +99,9 @@ public class DetailedExercise {
                     detailedExercise.id,
                     detailedExercise.setCount,
                     detailedExercise.perSetCount,
+                    detailedExercise.restBetweenSets,
                     detailedExercise.weight,
+                    detailedExercise.rir,
                     detailedExercise.pace,
                     detailedExercise.time,
                     detailedExercise.tips,
@@ -99,7 +120,7 @@ public class DetailedExercise {
         protected String videoUrl;
         protected String description;
 
-        public static DetailedExerciseManagerDTO of (DetailedExercise detailedExercise) {
+        public static DetailedExerciseManagerDTO of(DetailedExercise detailedExercise) {
             DetailedExerciseManagerDTO simpleDTO = new DetailedExerciseManagerDTO(
                     detailedExercise.exercise.getName(),
                     detailedExercise.exercise.getVideoUrl(),

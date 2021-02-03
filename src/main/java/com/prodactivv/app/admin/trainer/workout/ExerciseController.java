@@ -4,13 +4,13 @@ import com.prodactivv.app.admin.trainer.models.DetailedExercise;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.Exercise;
 import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundException;
+import com.prodactivv.app.core.exceptions.NotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/admin/exercises")
@@ -36,6 +36,15 @@ public class ExerciseController {
         try {
             return ResponseEntity.ok(exerciseService.getDetailedExercise(id));
         } catch (ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/detail")
+    public ResponseEntity<DetailedExercise> updateDetailedExercise(@RequestBody DetailedExerciseDTO detailedExerciseDTO) {
+        try {
+            return ResponseEntity.ok(exerciseService.updateDetailedExercise(detailedExerciseDTO));
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

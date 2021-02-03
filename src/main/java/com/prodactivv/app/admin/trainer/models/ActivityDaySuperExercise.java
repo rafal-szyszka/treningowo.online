@@ -1,8 +1,6 @@
 package com.prodactivv.app.admin.trainer.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonMerge;
-import com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
 import lombok.*;
 
@@ -35,14 +33,16 @@ public class ActivityDaySuperExercise {
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class ActivityDatSuperExerciseManagerDto {
+    public static class ActivityDaySuperExerciseManagerDto {
 
         private Long id;
         private Long order;
         private Long detailedExerciseId;
         private Integer setCount;
-        private Integer perSetCount;
+        private String perSetCount;
+        private String restBetweenSets;
         private String weight;
+        private String rir;
         private String pace;
         private String time;
         private String tips;
@@ -54,15 +54,17 @@ public class ActivityDaySuperExercise {
         @JsonIgnore
         private DetailedExerciseManagerDTO detailedExerciseManagerDTO;
 
-        public static ActivityDatSuperExerciseManagerDto of(ActivityDaySuperExercise superExercise) {
+        public static ActivityDaySuperExerciseManagerDto of(ActivityDaySuperExercise superExercise) {
             DetailedExerciseManagerDTO detailedExerciseManagerDTO = DetailedExerciseManagerDTO.of(superExercise.detailedExercise);
-            return new ActivityDatSuperExerciseManagerDto(
+            return new ActivityDaySuperExerciseManagerDto(
                     superExercise.id,
                     superExercise.exerciseOrder,
                     detailedExerciseManagerDTO.id,
                     detailedExerciseManagerDTO.setCount,
                     detailedExerciseManagerDTO.perSetCount,
+                    detailedExerciseManagerDTO.restBetweenSets,
                     detailedExerciseManagerDTO.weight,
+                    detailedExerciseManagerDTO.rir,
                     detailedExerciseManagerDTO.pace,
                     detailedExerciseManagerDTO.time,
                     detailedExerciseManagerDTO.tips,

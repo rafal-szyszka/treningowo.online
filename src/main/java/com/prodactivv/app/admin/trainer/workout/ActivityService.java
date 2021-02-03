@@ -2,7 +2,7 @@ package com.prodactivv.app.admin.trainer.workout;
 
 import com.prodactivv.app.admin.trainer.models.ActivityDay;
 import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise;
-import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDatSuperExerciseManagerDto;
+import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDaySuperExerciseManagerDto;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise;
@@ -15,7 +15,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayDTO;
 import static com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
@@ -66,7 +68,7 @@ public class ActivityService {
             activityDay = repository.save(activityDay);
 
             if (activityDayDTO.getExercises() != null) {
-                for (ActivityDatSuperExerciseManagerDto superExerciseDto : activityDayDTO.getExercises()) {
+                for (ActivityDaySuperExerciseManagerDto superExerciseDto : activityDayDTO.getExercises()) {
                     DetailedExercise detailedExercise = exerciseService.provideDetails((DetailedExerciseDTO) superExerciseDto.getDetailedExerciseManagerDTO());
                     ActivityDaySuperExercise superExercise = ActivityDaySuperExercise.builder()
                             .detailedExercise(detailedExercise)
@@ -186,5 +188,27 @@ public class ActivityService {
         ActivityDay activityDay = repository.findById(id).orElseThrow(new NotFoundException(String.format("Activity day %s not found", id)));
         activityDay.setTips(tips);
         return ActivityDayManagerDTO.of(repository.save(activityDay));
+    }
+
+    public ActivityDaySuperExerciseManagerDto moveExerciseByStep(Long id, Long step) throws NotFoundException {
+        ActivityDaySuperExercise superExercise = superExerciseRepository.findById(id).orElseThrow(new NotFoundException(String.format("Super exercise %s not found", id)));
+        List<ActivityDaySuperExercise> collect = superExercise.getActivityDay().getSuperExercises().stream()
+                .filter(s -> s.getExerciseOrder().equals(superExercise.getExerciseOrder() + step))
+                .collect(Collectors.toList());
+
+        if (collect.size() > 1) {
+            throw new IllegalStateException(String.format("Found %s exercises with order %s", collect.size(), superExercise.getExerciseOrder() + step));
+        }
+
+        if (collect.size() == 1) {
+            ActivityDaySuperExercise exerciseToSwitch = collect.get(0);
+            Long tmpOrder = exerciseToSwitch.getExerciseOrder();
+            exerciseToSwitch.setExerciseOrder(superExercise.getExerciseOrder());
+            superExercise.setExerciseOrder(tmpOrder);
+            superExerciseRepository.save(exerciseToSwitch);
+            return ActivityDaySuperExerciseManagerDto.of(superExerciseRepository.save(superExercise));
+        }
+
+        return ActivityDaySuperExerciseManagerDto.of(superExercise);
     }
 }

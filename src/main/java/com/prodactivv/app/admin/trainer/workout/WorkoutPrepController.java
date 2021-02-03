@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.trainer.workout;
 
 import com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDaySuperExerciseManagerDto;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseDTO;
 import com.prodactivv.app.admin.trainer.models.DetailedExercise.DetailedExerciseManagerDTO;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO;
@@ -118,6 +119,15 @@ public class WorkoutPrepController {
                     workoutPlanService.addExerciseToActivityDay(id, deId, order)
             );
         } catch (NotFoundException | ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/manage/plan/activityDay/exercise/{id}/moveBy/{step}")
+    public ResponseEntity<ActivityDaySuperExerciseManagerDto> moveExerciseByStep(@PathVariable Long id, @PathVariable Long step) {
+        try {
+            return ResponseEntity.ok(workoutPlanService.moveExerciseByStep(id, step));
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

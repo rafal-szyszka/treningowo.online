@@ -1,7 +1,5 @@
 package com.prodactivv.app.admin.trainer.workout;
 
-import com.prodactivv.app.admin.trainer.models.ActivityWeek;
-import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
@@ -34,7 +32,7 @@ public class UsersWorkoutPlanService {
         UsersWorkoutPlan plan = new UsersWorkoutPlan();
         plan.setUser(user);
         plan.setCreatedAt(LocalDate.now());
-        plan.setIsActive(true);
+        plan.setIsActive(false);
         if (workoutPlan != null) {
             plan.setWorkoutPlan(workoutPlan);
         }

@@ -1,7 +1,7 @@
 package com.prodactivv.app.admin.trainer.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDatSuperExerciseManagerDto;
+import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDaySuperExerciseManagerDto;
 import lombok.*;
 
 import javax.persistence.*;
@@ -107,7 +107,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
         private Long id;
         private String name;
         private String tips;
-        private List<ActivityDatSuperExerciseManagerDto> exercises;
+        private List<ActivityDaySuperExerciseManagerDto> exercises;
 
         public static ActivityDayManagerDTO getEmpty(String name) {
             return new ActivityDayManagerDTO(
@@ -127,10 +127,10 @@ public class ActivityDay implements Comparable<ActivityDay> {
             );
         }
 
-        private static List<ActivityDatSuperExerciseManagerDto> getExercises(ActivityDay activityDay) {
+        private static List<ActivityDaySuperExerciseManagerDto> getExercises(ActivityDay activityDay) {
             if (activityDay.superExercises != null) {
                 return activityDay.superExercises.stream()
-                        .map(ActivityDatSuperExerciseManagerDto::of)
+                        .map(ActivityDaySuperExerciseManagerDto::of)
                         .collect(Collectors.toList());
             } else {
                 return new ArrayList<>();

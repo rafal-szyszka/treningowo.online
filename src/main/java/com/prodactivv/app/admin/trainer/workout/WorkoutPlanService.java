@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.trainer.workout;
 
 import com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayManagerDTO;
+import com.prodactivv.app.admin.trainer.models.ActivityDaySuperExercise.ActivityDaySuperExerciseManagerDto;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
@@ -75,5 +76,9 @@ public class WorkoutPlanService {
 
     public ActivityDayManagerDTO setActivityDayTips(Long id, String tips) throws NotFoundException {
         return activityService.setActivityDayTips(id, tips);
+    }
+
+    public ActivityDaySuperExerciseManagerDto moveExerciseByStep(Long id, Long step) throws NotFoundException {
+        return activityService.moveExerciseByStep(id, step);
     }
 }

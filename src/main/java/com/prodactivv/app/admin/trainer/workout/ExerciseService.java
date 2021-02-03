@@ -6,6 +6,7 @@ import com.prodactivv.app.admin.trainer.models.exceptions.ExerciseNotFoundExcept
 import com.prodactivv.app.admin.trainer.models.repositories.ActivityDaySuperExerciseRepository;
 import com.prodactivv.app.admin.trainer.models.repositories.DetailedExerciseRepository;
 import com.prodactivv.app.admin.trainer.models.repositories.ExerciseRepository;
+import com.prodactivv.app.core.exceptions.NotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -72,5 +73,14 @@ public class ExerciseService {
     public List<Exercise> searchExercisesByKey(String key) {
         key = key.replaceAll(" ", "%");
         return repository.searchByKey(key);
+    }
+
+    public DetailedExercise updateDetailedExercise(DetailedExerciseDTO detailedExerciseDTO) throws NotFoundException {
+        DetailedExercise detailedExercise = detailedExerciseRepository.findById(detailedExerciseDTO.getId())
+                .orElseThrow(new NotFoundException(String.format("Detailed exercise %s not found!", detailedExerciseDTO.getId())));
+
+        detailedExercise.update(detailedExerciseDTO);
+
+        return detailedExerciseRepository.save(detailedExercise);
     }
 }
