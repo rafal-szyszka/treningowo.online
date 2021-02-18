@@ -28,7 +28,6 @@ public class ActivityDaySuperExercise {
 
     private Long exerciseOrder;
 
-
     @Getter
     @Setter
     @NoArgsConstructor
@@ -38,7 +37,7 @@ public class ActivityDaySuperExercise {
         private Long id;
         private Long order;
         private Long detailedExerciseId;
-        private Integer setCount;
+        private String setCount;
         private String perSetCount;
         private String restBetweenSets;
         private String weight;

@@ -1,6 +1,6 @@
 package com.prodactivv.app.core.user;
 
-import com.prodactivv.app.core.subscription.SubscriptionPlan;
+import com.prodactivv.app.subscription.model.SubscriptionPlan;
 import lombok.*;
 
 import java.time.LocalDate;

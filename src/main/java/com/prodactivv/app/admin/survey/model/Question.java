@@ -30,6 +30,8 @@ public class Question {
     @Column(columnDefinition = "BIGINT(20) DEFAULT 0")
     private Long mandatory;
 
+    private Long questionOrder;
+
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "questionnaire_id")

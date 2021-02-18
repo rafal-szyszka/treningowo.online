@@ -1,14 +1,15 @@
-package com.prodactivv.app.subscription;
+package com.prodactivv.app.subscription.service;
 
 import com.prodactivv.app.admin.survey.controller.QuestionnaireService;
 import com.prodactivv.app.core.exceptions.NotFoundException;
-import com.prodactivv.app.core.subscription.SubscriptionPlan;
-import com.prodactivv.app.core.subscription.SubscriptionPlan.SubscriptionPlanDto;
-import com.prodactivv.app.core.subscription.SubscriptionPlanRepository;
+import com.prodactivv.app.subscription.model.SubscriptionPlan;
+import com.prodactivv.app.subscription.model.SubscriptionPlan.SubscriptionPlanDto;
+import com.prodactivv.app.subscription.model.SubscriptionPlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,10 @@ public class SubscriptionPlanService {
     public SubscriptionPlan getSubscriptionPlanById(Long id) throws NotFoundException {
         return repository.findById(id)
                 .orElseThrow(new NotFoundException(String.format(EXCEPTION_NOT_FOUND_MSG, id)));
+    }
+
+    public Optional<SubscriptionPlan> getSubscriptionPlanByIdNullSafe(Long id) {
+        return repository.findById(id);
     }
 
     public SubscriptionPlan create(SubscriptionPlanDto subscriptionPlanDto) throws NotFoundException {

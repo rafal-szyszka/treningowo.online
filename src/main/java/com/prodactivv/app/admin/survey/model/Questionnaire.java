@@ -24,6 +24,7 @@ public class Questionnaire {
             mappedBy = "questionnaire",
             cascade = CascadeType.ALL,
             orphanRemoval = true)
+    @OrderBy("questionOrder ASC")
     private List<Question> questions;
 
     public void addQuestion(Question question) {

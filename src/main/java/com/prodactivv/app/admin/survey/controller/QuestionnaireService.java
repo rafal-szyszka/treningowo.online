@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.QuestionnaireResultDto;
 
@@ -42,6 +43,7 @@ public class QuestionnaireService {
                 .orElseThrow(new NotFoundException(
                         String.format(QUESTIONNAIRE_NOT_FOUND_MSG, id)
                 ));
+        question.setQuestionOrder(questionnaire.getQuestions().size() + 1L);
         question.setQuestionnaire(questionnaire);
         question = questionRepository.save(question);
 
@@ -122,5 +124,27 @@ public class QuestionnaireService {
 
         return savedFiles;
 
+    }
+
+    public Question editQuestionMoveByStep(Long questionId, Long step) throws NotFoundException {
+        Question question = questionRepository.findById(questionId).orElseThrow(new NotFoundException(String.format("Question %s not found.", questionId)));
+        List<Question> collect = question.getQuestionnaire().getQuestions().stream()
+                .filter(q -> q.getQuestionOrder().equals(question.getQuestionOrder() + step))
+                .collect(Collectors.toList());
+
+        if (collect.size() > 1) {
+            throw new IllegalStateException(String.format("Found %s questions with order %s", collect.size(), question.getQuestionOrder() + step));
+        }
+
+        if (collect.size() == 1) {
+            Question questionToSwitch = collect.get(0);
+            Long tmpOrder = questionToSwitch.getQuestionOrder();
+            questionToSwitch.setQuestionOrder(question.getQuestionOrder());
+            question.setQuestionOrder(tmpOrder);
+            questionRepository.save(questionToSwitch);
+            return questionRepository.save(question);
+        }
+
+        return question;
     }
 }

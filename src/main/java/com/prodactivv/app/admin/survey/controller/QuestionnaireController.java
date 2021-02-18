@@ -53,6 +53,15 @@ public class QuestionnaireController {
         }
     }
 
+    @PutMapping(value = "/question/{questionId}/move/{step}")
+    public ResponseEntity<Question> editQuestionMoveByStep(@PathVariable Long questionId, @PathVariable Long step) {
+        try {
+            return ResponseEntity.ok(service.editQuestionMoveByStep(questionId, step));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @DeleteMapping(value = "/question/{questionId}")
     public ResponseEntity<Long> deleteQuestion(@PathVariable Long questionId) {
         try {

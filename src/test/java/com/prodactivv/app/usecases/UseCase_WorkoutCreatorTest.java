@@ -158,7 +158,7 @@ public class UseCase_WorkoutCreatorTest {
                         .exerciseId(exercise.getId())
                         .pace("3011")
                         .perSetCount("6")
-                        .setCount(4)
+                        .setCount("4")
                         .time("N/D")
                         .tips("N/D")
                         .weight("45KG")

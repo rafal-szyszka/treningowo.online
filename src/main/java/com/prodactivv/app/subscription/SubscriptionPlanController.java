@@ -1,8 +1,9 @@
 package com.prodactivv.app.subscription;
 
 import com.prodactivv.app.core.exceptions.NotFoundException;
-import com.prodactivv.app.core.subscription.SubscriptionPlan;
-import com.prodactivv.app.core.subscription.SubscriptionPlan.SubscriptionPlanDto;
+import com.prodactivv.app.subscription.model.SubscriptionPlan;
+import com.prodactivv.app.subscription.model.SubscriptionPlan.SubscriptionPlanDto;
+import com.prodactivv.app.subscription.service.SubscriptionPlanService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

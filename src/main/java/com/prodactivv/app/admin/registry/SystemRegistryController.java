@@ -30,7 +30,11 @@ public class SystemRegistryController {
 
     @PutMapping
     public ResponseEntity<SystemRegistryEntity> updateRegistryEntity(@RequestBody SystemRegistryEntity entity) {
-        return ResponseEntity.ok(service.updateEntity(entity));
+        try {
+            return ResponseEntity.ok(service.updateEntity(entity));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
 }

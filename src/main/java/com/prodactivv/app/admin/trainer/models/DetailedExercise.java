@@ -18,7 +18,7 @@ public class DetailedExercise {
     @GeneratedValue
     private Long id;
 
-    private Integer setCount;
+    private String setCount;
 
     private String perSetCount;
 
@@ -84,7 +84,7 @@ public class DetailedExercise {
     public static class DetailedExerciseDTO {
 
         protected Long id;
-        protected Integer setCount;
+        protected String setCount;
         protected String perSetCount;
         protected String restBetweenSets;
         protected String weight;
@@ -134,6 +134,8 @@ public class DetailedExercise {
             simpleDTO.pace = detailedExercise.pace;
             simpleDTO.time = detailedExercise.time;
             simpleDTO.tips = detailedExercise.tips;
+            simpleDTO.rir = detailedExercise.rir;
+            simpleDTO.restBetweenSets = detailedExercise.restBetweenSets;
             simpleDTO.exerciseId = detailedExercise.exercise.getId();
 
             return simpleDTO;

@@ -18,7 +18,9 @@ public class SystemRegistryService {
         return repository.findByRegKey(key).orElseThrow(new NotFoundException(String.format("%s not found!", key)));
     }
 
-    public SystemRegistryEntity updateEntity(SystemRegistryEntity entity) {
-        return createEntity(entity);
+    public SystemRegistryEntity updateEntity(SystemRegistryEntity entity) throws NotFoundException {
+        SystemRegistryEntity updated = getEntityByKey(entity.getRegKey());
+        updated.setValue(entity.getValue());
+        return createEntity(updated);
     }
 }

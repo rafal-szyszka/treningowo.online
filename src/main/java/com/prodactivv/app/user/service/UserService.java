@@ -3,12 +3,12 @@ package com.prodactivv.app.user.service;
 import com.prodactivv.app.admin.survey.model.Questionnaire;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
-import com.prodactivv.app.core.subscription.SubscriptionPlan;
+import com.prodactivv.app.subscription.model.SubscriptionPlan;
 import com.prodactivv.app.core.user.User;
 import com.prodactivv.app.core.user.UserDTO;
 import com.prodactivv.app.core.user.UserRepository;
 import com.prodactivv.app.core.user.UserSubscriptionDTO;
-import com.prodactivv.app.subscription.SubscriptionPlanService;
+import com.prodactivv.app.subscription.service.SubscriptionPlanService;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 

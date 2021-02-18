@@ -1,10 +1,12 @@
-package com.prodactivv.app.core.subscription;
+package com.prodactivv.app.subscription.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prodactivv.app.admin.survey.model.Questionnaire;
 import lombok.*;
 
 import javax.persistence.*;
 import java.util.Optional;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -36,6 +38,10 @@ public class SubscriptionPlan {
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinColumn(name = "training_questionnaire_id", referencedColumnName = "id")
     private Questionnaire trainingQuestionnaire;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "subscriptionPlans")
+    private Set<PromoCode> promoCodes;
 
     public Optional<Questionnaire> getDietaryQuestionnaire() {
         return Optional.ofNullable(dietaryQuestionnaire);
