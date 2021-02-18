@@ -1,7 +1,7 @@
 package com.prodactivv.app.user.controller;
 
-import com.prodactivv.app.core.user.User;
-import com.prodactivv.app.core.user.UserDTO;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
 import org.springframework.beans.factory.annotation.Autowired;

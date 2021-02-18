@@ -1,6 +1,6 @@
 package com.prodactivv.app.core.security;
 
-import com.prodactivv.app.core.user.User;
+import com.prodactivv.app.user.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

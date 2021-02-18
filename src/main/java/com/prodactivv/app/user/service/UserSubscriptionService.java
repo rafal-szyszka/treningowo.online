@@ -2,10 +2,10 @@ package com.prodactivv.app.user.service;
 
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
-import com.prodactivv.app.core.user.User;
-import com.prodactivv.app.core.user.UserSubscription;
-import com.prodactivv.app.core.user.UserSubscriptionDTO;
-import com.prodactivv.app.core.user.UserSubscriptionRepository;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserSubscription;
+import com.prodactivv.app.user.model.UserSubscriptionDTO;
+import com.prodactivv.app.user.model.UserSubscriptionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

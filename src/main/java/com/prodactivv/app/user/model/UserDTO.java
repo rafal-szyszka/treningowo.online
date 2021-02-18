@@ -1,4 +1,4 @@
-package com.prodactivv.app.core.user;
+package com.prodactivv.app.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prodactivv.app.user.service.StrongPassword;

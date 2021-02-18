@@ -2,7 +2,7 @@ package com.prodactivv.app.admin.survey.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prodactivv.app.admin.survey.model.Answer.AnswerDto;
-import com.prodactivv.app.core.user.User;
+import com.prodactivv.app.user.model.User;
 import lombok.*;
 
 import javax.persistence.*;

@@ -1,8 +1,8 @@
 package com.prodactivv.app.admin.trainer.models;
 
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanManagerDTO;
-import com.prodactivv.app.core.user.User;
-import com.prodactivv.app.core.user.UserDTO;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserDTO;
 import lombok.*;
 
 import javax.persistence.*;

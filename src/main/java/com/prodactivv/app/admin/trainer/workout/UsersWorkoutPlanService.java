@@ -6,8 +6,8 @@ import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.repositories.UsersWorkoutPlanRepository;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
-import com.prodactivv.app.core.user.User;
-import com.prodactivv.app.core.user.UserRepository;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

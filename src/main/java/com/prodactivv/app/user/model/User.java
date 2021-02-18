@@ -1,4 +1,4 @@
-package com.prodactivv.app.core.user;
+package com.prodactivv.app.user.model;
 
 import lombok.*;
 import org.bouncycastle.util.encoders.Hex;

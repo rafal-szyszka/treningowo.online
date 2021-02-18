@@ -2,9 +2,9 @@ package com.prodactivv.app.core.security;
 
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
-import com.prodactivv.app.core.user.User;
-import com.prodactivv.app.core.user.User.Roles;
-import com.prodactivv.app.core.user.UserDTO;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.User.Roles;
+import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.service.UserService;
 import org.springframework.stereotype.Service;
 

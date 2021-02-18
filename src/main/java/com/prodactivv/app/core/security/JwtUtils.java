@@ -1,7 +1,7 @@
 package com.prodactivv.app.core.security;
 
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
-import com.prodactivv.app.core.user.User;
+import com.prodactivv.app.user.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

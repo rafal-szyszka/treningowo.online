@@ -1,4 +1,4 @@
-package com.prodactivv.app.core.user;
+package com.prodactivv.app.user.model;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,9 +1,9 @@
 package com.prodactivv.app.user.service;
 
 import com.prodactivv.app.core.security.AuthService;
-import com.prodactivv.app.core.user.User;
-import com.prodactivv.app.core.user.UserDTO;
-import com.prodactivv.app.core.user.UserRepository;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserDTO;
+import com.prodactivv.app.user.model.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

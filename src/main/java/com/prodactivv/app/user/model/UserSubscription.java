@@ -1,4 +1,4 @@
-package com.prodactivv.app.core.user;
+package com.prodactivv.app.user.model;
 
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
 import lombok.*;
