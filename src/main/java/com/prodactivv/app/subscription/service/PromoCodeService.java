@@ -49,6 +49,15 @@ public class PromoCodeService {
         return repository.save(code);
     }
 
+    public PromoCode deleteById(Long id) throws NotFoundException {
+        PromoCode promoCode = getById(id);
+
+        promoCode.clearSubscriptionPlans();
+
+        repository.delete(promoCode);
+        return promoCode;
+    }
+
     public PromoCode activateCode(Long id) throws NotFoundException {
        return managePromoCodeState(id, true);
     }

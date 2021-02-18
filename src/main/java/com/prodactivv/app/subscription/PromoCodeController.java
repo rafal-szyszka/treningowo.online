@@ -46,4 +46,13 @@ public class PromoCodeController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<PromoCode> deletePromoCode(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(service.deleteById(id));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }
