@@ -1,5 +1,6 @@
 package com.prodactivv.app.user.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -36,6 +37,7 @@ public class User {
 
     private Integer age;
 
+    @JsonIgnore
     private String password;
 
     private String sex;
@@ -66,7 +68,7 @@ public class User {
     }
 
     public enum Roles {
-        USER("user"), ADMIN("admin");
+        USER("user"), ADMIN("admin"), DIETITIAN("dietitian");
 
         @Getter
         private final String roleName;
@@ -82,6 +84,16 @@ public class User {
         public static boolean hasAdminAccess(String role) {
             return role.equalsIgnoreCase(ADMIN.getRoleName());
         }
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public static class UserInvitationDto {
+        private String email;
+        private String subject;
+        private String message;
     }
 
 }

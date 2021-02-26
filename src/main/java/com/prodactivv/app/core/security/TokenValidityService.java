@@ -44,7 +44,7 @@ public class TokenValidityService {
     }
 
     public boolean hasAdminLevelAccess(TokenValidity tokenValidity) {
-        return tokenValidity.getUser().getRole().equalsIgnoreCase(Roles.ADMIN.getRoleName());
+        return tokenValidity.getUser().getRole().equalsIgnoreCase(Roles.ADMIN.getRoleName()) || tokenValidity.getUser().getRole().equalsIgnoreCase(Roles.DIETITIAN.getRoleName());
     }
 
     public boolean hasUserLevelAccess(TokenValidity tokenValidity) {

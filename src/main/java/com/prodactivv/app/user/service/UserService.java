@@ -1,14 +1,17 @@
 package com.prodactivv.app.user.service;
 
 import com.prodactivv.app.admin.survey.model.Questionnaire;
+import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
+import com.prodactivv.app.core.security.JwtUtils;
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.model.UserRepository;
 import com.prodactivv.app.user.model.UserSubscriptionDTO;
 import com.prodactivv.app.subscription.service.SubscriptionPlanService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
@@ -19,18 +22,37 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     public static final String USER_NOT_FOUND_MSG = "User not found: %s";
+
+    private final JwtUtils jwtUtils;
 
     private final UserRepository repository;
     private final SubscriptionPlanService subscriptionPlanService;
     private final UserSubscriptionService userSubscriptionService;
 
-    public UserService(UserRepository repository, SubscriptionPlanService subscriptionPlanService, UserSubscriptionService userSubscriptionService) {
-        this.repository = repository;
-        this.subscriptionPlanService = subscriptionPlanService;
-        this.userSubscriptionService = userSubscriptionService;
+    public List<UserSubscriptionDTO> getUsers(String token) throws DisintegratedJwsException {
+        String role = jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ROLE);
+        if (role.equalsIgnoreCase(User.Roles.DIETITIAN.getRoleName())) {
+            return repository.findAllUsers()
+                    .stream()
+                    .map(this::updateAge)
+                    .map(this::userToUserSubscription)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .filter(this::isSubscribedToPlanWithDiet)
+                    .collect(Collectors.toList());
+        } else {
+            return repository.findAllUsers()
+                    .stream()
+                    .map(this::updateAge)
+                    .map(this::userToUserSubscription)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+        }
     }
 
     public List<UserDTO> getUsers() {
@@ -91,5 +113,17 @@ public class UserService {
         trainingQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
 
         return ids;
+    }
+
+    private Optional<UserSubscriptionDTO> userToUserSubscription(User user) {
+        try {
+            return Optional.of(userSubscriptionService.getUserActiveSubscriptions(user));
+        } catch (UserNotFoundException e) {
+            return Optional.empty();
+        }
+    }
+
+    private boolean isSubscribedToPlanWithDiet(UserSubscriptionDTO user) {
+        return user.getSubscriptions().get(0).getDietaryQuestionnaire().isPresent();
     }
 }

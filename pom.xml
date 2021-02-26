@@ -27,6 +27,8 @@
         <bcprov-jdk15on-version>1.65</bcprov-jdk15on-version>
         <h2-version>1.4.200</h2-version>
         <mockito-all-version>1.10.19</mockito-all-version>
+        <commons-codec-version>1.15</commons-codec-version>
+        <spring-boot-starter-mail-version>2.4.2</spring-boot-starter-mail-version>
     </properties>
 
     <dependencies>
@@ -97,6 +99,17 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-configuration-processor</artifactId>
             <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>${spring-boot-starter-mail-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+            <version>${commons-codec-version}</version>
         </dependency>
 
         <dependency>

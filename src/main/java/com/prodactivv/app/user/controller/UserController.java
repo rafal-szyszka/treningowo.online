@@ -4,7 +4,6 @@ import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.core.security.JwtUtils;
-import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.model.UserSubscriptionDTO;
 import com.prodactivv.app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -36,8 +35,12 @@ public class UserController {
     }
 
     @GetMapping(value = "/admin/users/getAll")
-    public ResponseEntity<List<UserDTO>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers());
+    public ResponseEntity<List<UserSubscriptionDTO>> getUsers(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            return ResponseEntity.ok(userService.getUsers(token));
+        } catch (DisintegratedJwsException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @PostMapping(value = "/user/{userId}/subscribe/{planId}")
