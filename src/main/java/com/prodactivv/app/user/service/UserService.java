@@ -91,7 +91,7 @@ public class UserService {
         SubscriptionPlan plan = subscriptionPlanService.getSubscriptionPlanById(planId);
 
         return userSubscriptionService.subscribe(
-                user, plan, LocalDate.now().plusDays(plan.getIntermittency())
+                user, plan, LocalDate.now().plusMonths(plan.getIntermittency())
         );
     }
 

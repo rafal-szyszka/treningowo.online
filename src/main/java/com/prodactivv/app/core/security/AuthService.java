@@ -3,9 +3,13 @@ package com.prodactivv.app.core.security;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.InvalidCredentialsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.model.UserRepository;
+import com.prodactivv.app.user.model.UserSubscriptionDTO;
+import com.prodactivv.app.user.service.UserSubscriptionService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +20,7 @@ import java.util.Base64;
 import java.util.Collections;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
     public static final String USERKEY_VALUES_DELIMITER = ":";
@@ -25,18 +30,14 @@ public class AuthService {
 
     private final UserRepository repository;
     private final TokenValidityService tokenValidityService;
+    private final UserSubscriptionService subscriptionService;
 
     @Value("${app.security.access.control.user-level.url.prefix}")
     private String accessControlUserLevelUrlPrefix;
     @Value("${app.security.access.control.admin-level.url.prefix}")
     private String accessControlAdminLevelUrlPrefix;
 
-    public AuthService(UserRepository repository, TokenValidityService tokenValidityService) {
-        this.repository = repository;
-        this.tokenValidityService = tokenValidityService;
-    }
-
-    public AuthResponse generateToken(String userKey) throws NotFoundException, InvalidCredentialsException, DisintegratedJwsException {
+    public AuthResponse generateToken(String userKey) throws NotFoundException, InvalidCredentialsException, DisintegratedJwsException, UserNotFoundException {
         String[] credentials = new String(Base64.getDecoder().decode(userKey)).split(USERKEY_VALUES_DELIMITER);
         User user = repository.findUserByEmail(credentials[CREDENTIALS_EMAIL])
                 .orElseThrow(new NotFoundException(
@@ -50,7 +51,7 @@ public class AuthService {
         throw new InvalidCredentialsException();
     }
 
-    public AuthResponse getTokenData(String token) throws NotFoundException, DisintegratedJwsException {
+    public AuthResponse getTokenData(String token) throws NotFoundException, DisintegratedJwsException, UserNotFoundException {
         TokenValidity tokenValidity = tokenValidityService.getTokenValidity(token);
         UserDTO userDTO = getUser(token);
 
@@ -60,6 +61,7 @@ public class AuthService {
                 .userId(userDTO.getId())
                 .validUntil(tokenValidity.getUntil())
                 .token(token)
+                .userData(subscriptionService.getUserActiveSubscriptions(userDTO))
                 .build();
     }
 
@@ -67,7 +69,7 @@ public class AuthService {
         return tokenValidityService.getUser(token);
     }
 
-    public AuthResponse generateTokenForUser(User user) throws NotFoundException, DisintegratedJwsException {
+    public AuthResponse generateTokenForUser(User user) throws NotFoundException, DisintegratedJwsException, UserNotFoundException {
         return getTokenData(
                 tokenValidityService
                         .createTokenValidityForUser(user)

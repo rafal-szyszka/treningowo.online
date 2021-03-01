@@ -1,5 +1,6 @@
 package com.prodactivv.app.core.security;
 
+import com.prodactivv.app.user.model.UserSubscriptionDTO;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -15,5 +16,6 @@ public class AuthResponse {
     private String userEmail;
     private String userRole;
     private LocalDateTime validUntil;
+    private UserSubscriptionDTO userData;
 
 }

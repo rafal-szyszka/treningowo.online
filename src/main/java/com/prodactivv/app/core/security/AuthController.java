@@ -1,9 +1,6 @@
 package com.prodactivv.app.core.security;
 
-import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
-import com.prodactivv.app.core.exceptions.ExceptionResponseWrapper;
-import com.prodactivv.app.core.exceptions.InvalidCredentialsException;
-import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,7 +22,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> generateToken(@RequestBody String userKey) {
         try {
             return ResponseEntity.ok(authService.generateToken(userKey));
-        } catch (NotFoundException | InvalidCredentialsException | DisintegratedJwsException e) {
+        } catch (NotFoundException | InvalidCredentialsException | DisintegratedJwsException | UserNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
@@ -34,7 +31,7 @@ public class AuthController {
     public ResponseEntity<AuthResponse> getUserData(@RequestHeader(value = HttpHeaders.AUTHORIZATION) String token) {
         try {
             return ResponseEntity.ok(authService.getTokenData(token));
-        } catch (NotFoundException | DisintegratedJwsException e) {
+        } catch (NotFoundException | DisintegratedJwsException | UserNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

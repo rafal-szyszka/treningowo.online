@@ -2,10 +2,7 @@ package com.prodactivv.app.user.service;
 
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
-import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserSubscription;
-import com.prodactivv.app.user.model.UserSubscriptionDTO;
-import com.prodactivv.app.user.model.UserSubscriptionRepository;
+import com.prodactivv.app.user.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -31,6 +28,12 @@ public class UserSubscriptionService {
     }
 
     public UserSubscriptionDTO getUserActiveSubscriptions(User user) throws UserNotFoundException {
+        UserSubscription userSubscription = repository.findAllUserSubscriptions(user.getId())
+                .orElseThrow(new UserNotFoundException(user.getId()));
+        return UserSubscriptionDTO.of(userSubscription);
+    }
+
+    public UserSubscriptionDTO getUserActiveSubscriptions(UserDTO user) throws UserNotFoundException {
         UserSubscription userSubscription = repository.findAllUserSubscriptions(user.getId())
                 .orElseThrow(new UserNotFoundException(user.getId()));
         return UserSubscriptionDTO.of(userSubscription);
