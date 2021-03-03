@@ -39,6 +39,10 @@ public class SubscriptionPlan {
     @JoinColumn(name = "training_questionnaire_id", referencedColumnName = "id")
     private Questionnaire trainingQuestionnaire;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "combined_questionnaire_id", referencedColumnName = "id")
+    private Questionnaire combinedQuestionnaire;
+
     @JsonIgnore
     @ManyToMany(mappedBy = "subscriptionPlans")
     private Set<PromoCode> promoCodes;
@@ -65,6 +69,18 @@ public class SubscriptionPlan {
         private String description;
         private Long dietaryQuestionnaireId;
         private Long trainingQuestionnaireId;
+        private Long combinedQuestionnaireId;
+
+        public static SubscriptionPlanDto of(SubscriptionPlan subscriptionPlan) {
+            return SubscriptionPlanDto.builder()
+                    .id(subscriptionPlan.id)
+                    .name(subscriptionPlan.name)
+                    .price(subscriptionPlan.price)
+                    .currency(subscriptionPlan.currency)
+                    .intermittency(subscriptionPlan.intermittency)
+                    .description(subscriptionPlan.description)
+                    .build();
+        }
 
         public SubscriptionPlan cast() {
             return SubscriptionPlan.builder()

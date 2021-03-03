@@ -37,6 +37,9 @@ public class SubscriptionPlanService {
         if (subscriptionPlanDto.getTrainingQuestionnaireId() != null) {
             plan.setTrainingQuestionnaire(questionnaireService.getQuestionnaire(subscriptionPlanDto.getTrainingQuestionnaireId()));
         }
+        if (subscriptionPlanDto.getCombinedQuestionnaireId() != null) {
+            plan.setCombinedQuestionnaire(questionnaireService.getQuestionnaire(subscriptionPlanDto.getCombinedQuestionnaireId()));
+        }
         return repository.save(plan);
     }
 

@@ -1,5 +1,7 @@
 package com.prodactivv.app.core.security;
 
+import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO.SimpleWorkoutPlanView;
+import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.InvalidCredentialsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
@@ -7,7 +9,6 @@ import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.model.UserRepository;
-import com.prodactivv.app.user.model.UserSubscriptionDTO;
 import com.prodactivv.app.user.service.UserSubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Collections;
+import java.util.stream.Collectors;
+
+import static com.prodactivv.app.user.model.UserSubscriptionDTO.SimpleSubscriptionView.of;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +35,7 @@ public class AuthService {
     private final UserRepository repository;
     private final TokenValidityService tokenValidityService;
     private final UserSubscriptionService subscriptionService;
+    private final UsersWorkoutPlanService workoutPlanService;
 
     @Value("${app.security.access.control.user-level.url.prefix}")
     private String accessControlUserLevelUrlPrefix;
@@ -55,14 +60,25 @@ public class AuthService {
         TokenValidity tokenValidity = tokenValidityService.getTokenValidity(token);
         UserDTO userDTO = getUser(token);
 
-        return AuthResponse.builder()
-                .userEmail(userDTO.getEmail())
-                .userRole(userDTO.getRole())
-                .userId(userDTO.getId())
-                .validUntil(tokenValidity.getUntil())
-                .token(token)
-                .userData(subscriptionService.getUserActiveSubscriptions(userDTO))
-                .build();
+        if (userDTO.getRole().equalsIgnoreCase(User.Roles.USER.getRoleName())) {
+            return AuthResponse.builder()
+                    .userEmail(userDTO.getEmail())
+                    .userRole(userDTO.getRole())
+                    .validUntil(tokenValidity.getUntil())
+                    .token(token)
+                    .user(userDTO)
+                    .subscription(of(subscriptionService.getUserActiveSubscriptions(userDTO)))
+                    .workoutPlans(workoutPlanService.getUserWorkoutPlans(userDTO.getId()).stream().map(SimpleWorkoutPlanView::of).collect(Collectors.toList()))
+                    .build();
+        } else {
+            return AuthResponse.builder()
+                    .userEmail(userDTO.getEmail())
+                    .userRole(userDTO.getRole())
+                    .user(userDTO)
+                    .validUntil(tokenValidity.getUntil())
+                    .token(token)
+                    .build();
+        }
     }
 
     public UserDTO getUser(String token) throws NotFoundException, DisintegratedJwsException {

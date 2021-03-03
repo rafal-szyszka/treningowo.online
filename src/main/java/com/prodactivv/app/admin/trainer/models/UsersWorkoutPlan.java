@@ -54,5 +54,37 @@ public class UsersWorkoutPlan {
                     plan.createdAt.plusWeeks(plan.workoutPlan.getActivityWeeks().size())
             );
         }
+
+        @Getter
+        @Setter
+        @AllArgsConstructor
+        public static class SimpleWorkoutPlanView {
+            private Long id;
+            private WorkoutPlanManagerDTO workoutPlan;
+            private Boolean isActive;
+            private LocalDate createdAt;
+            private LocalDate until;
+
+            public static SimpleWorkoutPlanView of(UsersWorkoutPlan plan) {
+                return new SimpleWorkoutPlanView(
+                        plan.id,
+                        WorkoutPlanManagerDTO.of(plan.workoutPlan),
+                        plan.isActive,
+                        plan.createdAt,
+                        plan.createdAt.plusWeeks(plan.workoutPlan.getActivityWeeks().size())
+                );
+            }
+
+            public static SimpleWorkoutPlanView of(UsersWorkoutPlanDTO plan) {
+                return new SimpleWorkoutPlanView(
+                        plan.id,
+                        plan.workoutPlan,
+                        plan.isActive,
+                        plan.createdAt,
+                        plan.createdAt.plusWeeks(plan.workoutPlan.getActivityWeeks().size())
+                );
+            }
+        }
+
     }
 }

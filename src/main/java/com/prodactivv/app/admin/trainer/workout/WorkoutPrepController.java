@@ -181,4 +181,22 @@ public class WorkoutPrepController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
+    @PutMapping(value = "/manage/plan/{id}/activate")
+    public ResponseEntity<UsersWorkoutPlanDTO> activatePlan(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(usersWorkoutPlanService.activate(id));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/manage/plan/{id}/deactivate")
+    public ResponseEntity<UsersWorkoutPlanDTO> deactivatePlan(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(usersWorkoutPlanService.deactivate(id));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

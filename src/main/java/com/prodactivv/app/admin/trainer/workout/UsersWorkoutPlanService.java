@@ -55,7 +55,20 @@ public class UsersWorkoutPlanService {
         );
     }
 
-//    public UsersWorkoutPlanDTO copy(Long id) throws NotFoundException {
-//        UsersWorkoutPlan plan = repository.findById(id).orElseThrow(NotFoundException::new);
-//    }
+    public UsersWorkoutPlanDTO activate(Long id) throws NotFoundException {
+        UsersWorkoutPlan usersWorkoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format("Plan %s not found", id)));
+        repository.findAllByUserId(usersWorkoutPlan.getUser().getId()).forEach(plan -> {
+            plan.setIsActive(false);
+            repository.save(plan);
+        });
+
+        usersWorkoutPlan.setIsActive(true);
+        return UsersWorkoutPlanDTO.of(repository.save(usersWorkoutPlan));
+    }
+
+    public UsersWorkoutPlanDTO deactivate(Long id) throws NotFoundException {
+        UsersWorkoutPlan usersWorkoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format("Plan %s not found", id)));
+        usersWorkoutPlan.setIsActive(false);
+        return UsersWorkoutPlanDTO.of(repository.save(usersWorkoutPlan));
+    }
 }
