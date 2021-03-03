@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +25,7 @@ public class UserController {
     private final JwtUtils jwtUtils;
 
     @GetMapping(value = "/admin/users/{id}")
-    public ResponseEntity<UserSubscriptionDTO> getUser(@PathVariable Long id) {
+    public ResponseEntity<Optional<UserSubscriptionDTO>> getUser(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(userService.getUserActiveSubscriptions(id));
         } catch (UserNotFoundException e) {
@@ -58,7 +59,7 @@ public class UserController {
     public ResponseEntity<List<Pair<Long, String>>> getUsersSubscriptionPlanQuestionnaires(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(userService.getPlanQuestionnaires(id));
-        } catch (NotFoundException | UserNotFoundException e) {
+        } catch (NotFoundException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
@@ -67,7 +68,7 @@ public class UserController {
     public ResponseEntity<List<Pair<Long, String>>> getUserSubscriptionPlanQuestionnaires(@RequestHeader(value = HttpHeaders.AUTHORIZATION) String token) {
         try {
             return ResponseEntity.ok(userService.getPlanQuestionnaires(Long.valueOf(jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID))));
-        } catch (NotFoundException | UserNotFoundException | DisintegratedJwsException e) {
+        } catch (NotFoundException | DisintegratedJwsException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

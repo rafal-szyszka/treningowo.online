@@ -16,7 +16,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSubscriptionDTO {
+public class  UserSubscriptionDTO {
 
     private List<SubscriptionPlan> subscriptions;
     private LocalDate until;
@@ -47,6 +47,7 @@ public class UserSubscriptionDTO {
         private Long expiresInDays;
 
         public static SimpleSubscriptionView of(UserSubscription userSubscription) {
+            if (userSubscription == null) return null;
             return new SimpleSubscriptionView(
                     Collections.singletonList(SubscriptionPlanDto.of(userSubscription.getPlan())),
                     userSubscription.getUntil(),
@@ -55,6 +56,7 @@ public class UserSubscriptionDTO {
         }
 
         public static SimpleSubscriptionView of(UserSubscriptionDTO userSubscription) {
+            if (userSubscription == null) return null;
             return new SimpleSubscriptionView(
                     userSubscription.subscriptions.stream().map(SubscriptionPlanDto::of).collect(Collectors.toList()),
                     userSubscription.getUntil(),

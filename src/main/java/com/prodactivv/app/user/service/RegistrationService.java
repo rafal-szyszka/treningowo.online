@@ -25,11 +25,12 @@ public class RegistrationService {
 
     public UserDTO signUp(User user) throws UserRegistrationException {
         try {
-            if (!userRepository.findUserByEmail(user.getEmail()).isPresent()) {
+            if (userRepository.findUserByEmail(user.getEmail()).isEmpty()) {
                 user.setSignedUpDate(LocalDate.now());
                 user.setAge(userService.calculateUserAge(user));
                 user.setRole(User.Roles.USER.getRoleName());
                 UserDTO userDto = UserDTO.of(userRepository.save(user));
+                System.out.println(userDto.toString());
                 userDto.setToken(authService.generateTokenForUser(user).getToken());
                 return userDto;
             } else {

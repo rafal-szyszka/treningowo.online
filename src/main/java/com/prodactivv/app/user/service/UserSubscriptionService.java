@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,15 +28,25 @@ public class UserSubscriptionService {
         );
     }
 
-    public UserSubscriptionDTO getUserActiveSubscriptions(User user) throws UserNotFoundException {
-        UserSubscription userSubscription = repository.findAllUserSubscriptions(user.getId())
-                .orElseThrow(new UserNotFoundException(user.getId()));
-        return UserSubscriptionDTO.of(userSubscription);
+    public Optional<UserSubscriptionDTO> getUserActiveSubscriptions(User user) {
+        try {
+            UserSubscription userSubscription = repository.findAllUserSubscriptions(user.getId())
+                    .orElseThrow(new UserNotFoundException(user.getId()));
+            return Optional.of(UserSubscriptionDTO.of(userSubscription));
+        } catch (UserNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.empty();
     }
 
-    public UserSubscriptionDTO getUserActiveSubscriptions(UserDTO user) throws UserNotFoundException {
-        UserSubscription userSubscription = repository.findAllUserSubscriptions(user.getId())
-                .orElseThrow(new UserNotFoundException(user.getId()));
-        return UserSubscriptionDTO.of(userSubscription);
+    public Optional<UserSubscriptionDTO> getUserActiveSubscriptions(UserDTO user) {
+        try {
+            UserSubscription userSubscription = repository.findAllUserSubscriptions(user.getId())
+                    .orElseThrow(new UserNotFoundException(user.getId()));
+            return Optional.of(UserSubscriptionDTO.of(userSubscription));
+        } catch (UserNotFoundException e) {
+            return Optional.empty();
+        }
     }
 }

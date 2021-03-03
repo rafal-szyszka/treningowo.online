@@ -55,6 +55,10 @@ public class SubscriptionPlan {
         return Optional.ofNullable(trainingQuestionnaire);
     }
 
+    public Optional<Questionnaire> getCombinedQuestionnaire() {
+        return Optional.ofNullable(combinedQuestionnaire);
+    }
+
     @Getter
     @Setter
     @Builder

@@ -67,7 +67,7 @@ public class AuthService {
                     .validUntil(tokenValidity.getUntil())
                     .token(token)
                     .user(userDTO)
-                    .subscription(of(subscriptionService.getUserActiveSubscriptions(userDTO)))
+                    .subscription(of(subscriptionService.getUserActiveSubscriptions(userDTO).orElse(null)))
                     .workoutPlans(workoutPlanService.getUserWorkoutPlans(userDTO.getId()).stream().map(SimpleWorkoutPlanView::of).collect(Collectors.toList()))
                     .build();
         } else {

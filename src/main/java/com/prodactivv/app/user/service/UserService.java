@@ -95,32 +95,34 @@ public class UserService {
         );
     }
 
-    public UserSubscriptionDTO getUserActiveSubscriptions(Long id) throws UserNotFoundException {
+    public Optional<UserSubscriptionDTO> getUserActiveSubscriptions(Long id) throws UserNotFoundException {
         User user = repository.findById(id).orElseThrow(new UserNotFoundException(id));
         return userSubscriptionService.getUserActiveSubscriptions(user);
     }
 
-    public List<Pair<Long, String>> getPlanQuestionnaires(Long userId) throws NotFoundException, UserNotFoundException {
-        UserSubscriptionDTO subscription = userSubscriptionService.getUserActiveSubscriptions(getUser(userId));
-
-        SubscriptionPlan subPlan = subscriptionPlanService.getSubscriptionPlanById(subscription.getSubscriptions().get(0).getId());
-        Optional<Questionnaire> dietaryQuestionnaire = subPlan.getDietaryQuestionnaire();
-        Optional<Questionnaire> trainingQuestionnaire = subPlan.getTrainingQuestionnaire();
+    public List<Pair<Long, String>> getPlanQuestionnaires(Long userId) throws NotFoundException {
+        User user = getUser(userId);
+        Optional<UserSubscriptionDTO> subscription = userSubscriptionService.getUserActiveSubscriptions(user);
 
         List<Pair<Long, String>> ids = new ArrayList<>();
 
-        dietaryQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
-        trainingQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
+        if (subscription.isPresent()) {
 
+            SubscriptionPlan subPlan = subscriptionPlanService.getSubscriptionPlanById(subscription.get().getSubscriptions().get(0).getId());
+            Optional<Questionnaire> dietaryQuestionnaire = subPlan.getDietaryQuestionnaire();
+            Optional<Questionnaire> trainingQuestionnaire = subPlan.getTrainingQuestionnaire();
+            Optional<Questionnaire> combinedQuestionnaire = subPlan.getCombinedQuestionnaire();
+
+            dietaryQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
+            trainingQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
+            combinedQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
+
+        }
         return ids;
     }
 
     private Optional<UserSubscriptionDTO> userToUserSubscription(User user) {
-        try {
-            return Optional.of(userSubscriptionService.getUserActiveSubscriptions(user));
-        } catch (UserNotFoundException e) {
-            return Optional.empty();
-        }
+        return userSubscriptionService.getUserActiveSubscriptions(user);
     }
 
     private boolean isSubscribedToPlanWithDiet(UserSubscriptionDTO user) {
