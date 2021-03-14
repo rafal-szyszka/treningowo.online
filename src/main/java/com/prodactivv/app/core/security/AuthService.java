@@ -7,7 +7,6 @@ import com.prodactivv.app.core.exceptions.InvalidCredentialsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.model.UserRepository;
 import com.prodactivv.app.user.service.UserSubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.stream.Collectors;
-
-import static com.prodactivv.app.user.model.UserSubscriptionDTO.SimpleSubscriptionView.of;
 
 @Service
 @RequiredArgsConstructor
@@ -41,6 +38,8 @@ public class AuthService {
     private String accessControlUserLevelUrlPrefix;
     @Value("${app.security.access.control.admin-level.url.prefix}")
     private String accessControlAdminLevelUrlPrefix;
+    @Value("${app.security.access.control.public-level.url.prefix}")
+    private String accessControlPublicLevelUrlPrefix;
 
     public AuthResponse generateToken(String userKey) throws NotFoundException, InvalidCredentialsException, DisintegratedJwsException, UserNotFoundException {
         String[] credentials = new String(Base64.getDecoder().decode(userKey)).split(USERKEY_VALUES_DELIMITER);
@@ -58,30 +57,30 @@ public class AuthService {
 
     public AuthResponse getTokenData(String token) throws NotFoundException, DisintegratedJwsException, UserNotFoundException {
         TokenValidity tokenValidity = tokenValidityService.getTokenValidity(token);
-        UserDTO userDTO = getUser(token);
+        User.Dto.Full userDto = getUser(token);
 
-        if (userDTO.getRole().equalsIgnoreCase(User.Roles.USER.getRoleName())) {
+        if (User.Roles.isUser(userDto.getRole())) {
             return AuthResponse.builder()
-                    .userEmail(userDTO.getEmail())
-                    .userRole(userDTO.getRole())
+                    .userEmail(userDto.getEmail())
+                    .userRole(userDto.getRole())
                     .validUntil(tokenValidity.getUntil())
                     .token(token)
-                    .user(userDTO)
-                    .subscription(of(subscriptionService.getUserActiveSubscriptions(userDTO).orElse(null)))
-                    .workoutPlans(workoutPlanService.getUserWorkoutPlans(userDTO.getId()).stream().map(SimpleWorkoutPlanView::of).collect(Collectors.toList()))
+                    .user(userDto)
+                    .subscriptions(subscriptionService.getUserSubscriptions(userDto))
+                    .workoutPlans(workoutPlanService.getUserWorkoutPlans(userDto.getId()).stream().map(SimpleWorkoutPlanView::of).collect(Collectors.toList()))
                     .build();
         } else {
             return AuthResponse.builder()
-                    .userEmail(userDTO.getEmail())
-                    .userRole(userDTO.getRole())
-                    .user(userDTO)
+                    .userEmail(userDto.getEmail())
+                    .userRole(userDto.getRole())
+                    .user(userDto)
                     .validUntil(tokenValidity.getUntil())
                     .token(token)
                     .build();
         }
     }
 
-    public UserDTO getUser(String token) throws NotFoundException, DisintegratedJwsException {
+    public User.Dto.Full getUser(String token) throws NotFoundException, DisintegratedJwsException {
         return tokenValidityService.getUser(token);
     }
 
@@ -104,11 +103,19 @@ public class AuthService {
     }
 
     public UsernamePasswordAuthenticationToken createUsernamePasswordAuthToken(String token) throws NotFoundException, DisintegratedJwsException {
-        UserDTO user = tokenValidityService.getUser(token);
+        User.Dto.Full user = tokenValidityService.getUser(token);
         return new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
                 token,
                 Collections.singleton(new SimpleGrantedAuthority(user.getRole()))
+        );
+    }
+
+    public UsernamePasswordAuthenticationToken createPublicAuthToken() {
+        return new UsernamePasswordAuthenticationToken(
+                "public@prodactivv.com",
+                "00000",
+                Collections.singleton(new SimpleGrantedAuthority(User.Roles.USER.getRoleName()))
         );
     }
 
@@ -123,6 +130,10 @@ public class AuthService {
         }
 
         return false;
+    }
+
+    public boolean isPublicEndpoint(String url) {
+        return url.startsWith(accessControlPublicLevelUrlPrefix);
     }
 
     public void refreshToken(String token) throws NotFoundException {

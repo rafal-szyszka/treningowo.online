@@ -7,8 +7,12 @@ import com.prodactivv.app.subscription.model.PromoCodeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
 @RequiredArgsConstructor
@@ -18,11 +22,26 @@ public class PromoCodeService {
     private final SubscriptionPlanService subscriptionPlanService;
 
     public List<PromoCode> getAll() {
-        return repository.findAll();
+        return repository.findAll().stream()
+                .map(this::updateStatus)
+                .collect(Collectors.toList());
+    }
+
+    private PromoCode updateStatus(PromoCode promoCode) {
+        if (!isValid(promoCode)) {
+            promoCode.setIsActive(false);
+            return repository.save(promoCode);
+        }
+
+        return promoCode;
     }
 
     public PromoCode getById(Long id) throws NotFoundException {
         return repository.findById(id).orElseThrow(new NotFoundException(String.format("Promo code %s not found", id)));
+    }
+
+    public PromoCode getByCode(String code) throws NotFoundException {
+        return repository.findByCode(code).orElseThrow(new NotFoundException(String.format("Promo code %s not found", code)));
     }
 
     public PromoCode createNewPromoCode(PromoCodeDto promoCode) {
@@ -70,5 +89,9 @@ public class PromoCodeService {
         PromoCode promoCode = repository.findById(id).orElseThrow(new NotFoundException(String.format("Promo code %s not found.", id)));
         promoCode.setIsActive(state);
         return repository.save(promoCode);
+    }
+
+    public boolean isValid(PromoCode promoCode) {
+        return promoCode.getIsActive() && (promoCode.isIndefinite() || (promoCode.getIsActive() && DAYS.between(LocalDate.now(), promoCode.getValidUntil()) >= 0));
     }
 }

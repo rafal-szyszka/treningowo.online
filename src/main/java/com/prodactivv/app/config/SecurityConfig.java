@@ -35,7 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.cors()
                 .and().csrf().disable()
                 .authorizeRequests()
-                .anyRequest().authenticated().and()
+                .anyRequest().authenticated()
+                .and().csrf().disable()
                 .addFilter(new JwsSecurityFilter(
                                 authenticationManager(),
                                 new JwsSecurityFilter.JwsAuthenticationEntryPoint(),
@@ -70,7 +71,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         "/configuration/ui",
                         "/configuration/security",
                         "/swagger-ui.html",
-                        "/webjars/**")
-                .antMatchers("/public", "/public/**", "public/");
+//                        "/public",
+//                        "/public/**",
+                        "/webjars/**");
     }
 }

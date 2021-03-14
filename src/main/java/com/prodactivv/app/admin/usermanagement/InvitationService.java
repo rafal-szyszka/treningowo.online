@@ -7,7 +7,6 @@ import com.prodactivv.app.core.exceptions.InvitationExpiredException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.utils.HashGenerator;
 import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.User.UserInvitationDto;
 import com.prodactivv.app.user.model.UserRepository;
 import com.prodactivv.app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -33,12 +32,12 @@ public class InvitationService {
     private final UserRepository userRepository;
     private final UserInviteRepository userInviteRepository;
 
-    public UserInvite inviteDietitian(UserInvitationDto userInvitation) {
-        return invite(userInvitation, "DIETITIAN");
+    public UserInvite inviteDietitian(User.Dto.Invitation invitation) {
+        return invite(invitation, "DIETITIAN");
     }
 
-    public UserInvite inviteUser(UserInvitationDto userInvitation) {
-        return invite(userInvitation, "USER");
+    public UserInvite inviteUser(User.Dto.Invitation invitation) {
+        return invite(invitation, "USER");
     }
 
     public UserInvite getInviteByHash(String hash) throws NotFoundException, InvitationExpiredException {
@@ -71,9 +70,9 @@ public class InvitationService {
         return userInviteRepository.findAllByUserRole(role);
     }
 
-    private UserInvite invite(UserInvitationDto userInvitation, String type) throws IllegalArgumentException {
+    private UserInvite invite(User.Dto.Invitation invitation, String type) throws IllegalArgumentException {
         User user = new User();
-        user.setEmail(userInvitation.getEmail());
+        user.setEmail(invitation.getEmail());
         user.setPassword(hashGenerator.generateRandom(16));
 
         if (userRepository.findUserByEmail(user.getEmail()).isPresent()) {
@@ -91,10 +90,10 @@ public class InvitationService {
 
         invite = userInviteRepository.save(invite);
 
-        String content = userInvitation.getMessage();
+        String content = invitation.getMessage();
         content += "\n\nLink aktywacyjny: " + acceptInviteUrl + invite.getHash();
 
-        mailNotificationService.sendInvitationEmail(invite, userInvitation.getSubject(), content);
+        mailNotificationService.sendInvitationEmail(invite, invitation.getSubject(), content);
 
         return invite;
     }

@@ -1,22 +1,23 @@
 package com.prodactivv.app.user.service;
 
+import com.prodactivv.app.admin.survey.controller.QuestionnaireService;
 import com.prodactivv.app.admin.survey.model.Questionnaire;
+import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
+import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.core.security.JwtUtils;
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
-import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserDTO;
-import com.prodactivv.app.user.model.UserRepository;
-import com.prodactivv.app.user.model.UserSubscriptionDTO;
 import com.prodactivv.app.subscription.service.SubscriptionPlanService;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserRepository;
+import com.prodactivv.app.user.model.UserSubscription;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -32,39 +33,35 @@ public class UserService {
     private final UserRepository repository;
     private final SubscriptionPlanService subscriptionPlanService;
     private final UserSubscriptionService userSubscriptionService;
+    private final UsersWorkoutPlanService usersWorkoutPlanService;
+    private final QuestionnaireService questionnaireService;
 
-    public List<UserSubscriptionDTO> getUsers(String token) throws DisintegratedJwsException {
-        String role = jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ROLE);
-        if (role.equalsIgnoreCase(User.Roles.DIETITIAN.getRoleName())) {
-            return repository.findAllUsers()
-                    .stream()
-                    .map(this::updateAge)
-                    .map(this::userToUserSubscription)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .filter(this::isSubscribedToPlanWithDiet)
+    public List<User.Dto.SubscriptionsAndWorkouts> getUsersWithSubscriptions(String token) throws DisintegratedJwsException {
+        String demanderRole = jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ROLE);
+
+        if (User.Roles.isDietitian(demanderRole)) {
+            return repository.findAllUsers().stream()
+                    .map(this::getUserWithSubscriptionsAndWorkouts)
+                    .filter(User.Dto.SubscriptionsAndWorkouts::isSubscribedToPlanWithDiet)
                     .collect(Collectors.toList());
         } else {
-            return repository.findAllUsers()
-                    .stream()
-                    .map(this::updateAge)
-                    .map(this::userToUserSubscription)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
+            return repository.findAllUsers().stream()
+                    .map(this::getUserWithSubscriptionsAndWorkouts)
+                    .filter(User.Dto.SubscriptionsAndWorkouts::isSubscribedToPlanWithTrainings)
                     .collect(Collectors.toList());
         }
     }
 
-    public List<UserDTO> getUsers() {
+    public List<User.Dto.Full> getUsersWithSubscriptions() {
         return repository.findAllUsers()
                 .stream()
                 .map(this::updateAge)
-                .map(UserDTO::of)
+                .map(User.Dto.Full::fromUser)
                 .collect(Collectors.toList());
     }
 
-    public UserDTO getUserById(Long id) throws NotFoundException {
-        return UserDTO.of(getUser(id));
+    public User.Dto.Full getUserById(Long id) throws NotFoundException {
+        return User.Dto.Full.fromUser(getUser(id));
     }
 
     public User getUser(Long id) throws NotFoundException {
@@ -84,7 +81,7 @@ public class UserService {
         return yearDifference;
     }
 
-    public UserSubscriptionDTO subscribe(Long userId, Long planId) throws UserNotFoundException, NotFoundException {
+    public UserSubscription.Dto.Full subscribe(Long userId, Long planId) throws UserNotFoundException, NotFoundException {
         User user = repository.findById(userId)
                 .orElseThrow(new UserNotFoundException(userId));
 
@@ -95,37 +92,55 @@ public class UserService {
         );
     }
 
-    public Optional<UserSubscriptionDTO> getUserActiveSubscriptions(Long id) throws UserNotFoundException {
+    public User.Dto.SubscriptionsAndWorkouts getUserWithSubscriptionsAndWorkouts(Long id) throws UserNotFoundException {
         User user = repository.findById(id).orElseThrow(new UserNotFoundException(id));
-        return userSubscriptionService.getUserActiveSubscriptions(user);
+        return getUserWithSubscriptionsAndWorkouts(user);
+    }
+
+    public User.Dto.SubscriptionsAndWorkouts getUserWithSubscriptionsAndWorkouts(User user) {
+        List<UserSubscription.Dto.FullUserLess> subscriptions = userSubscriptionService.getUserSubscriptions(user);
+        List<UsersWorkoutPlan.Dto.WorkoutPlanData> userWorkoutPlansData = usersWorkoutPlanService.getUserWorkoutPlansData(user.getId());
+
+        return User.Dto.SubscriptionsAndWorkouts.builder()
+                .user(User.Dto.Full.fromUser(user))
+                .subscriptions(subscriptions)
+                .workoutPlans(userWorkoutPlansData)
+                .build();
     }
 
     public List<Pair<Long, String>> getPlanQuestionnaires(Long userId) throws NotFoundException {
         User user = getUser(userId);
-        Optional<UserSubscriptionDTO> subscription = userSubscriptionService.getUserActiveSubscriptions(user);
+        List<UserSubscription.Dto.FullUserLess> userSubscriptions = userSubscriptionService.getUserSubscriptions(user);
 
-        List<Pair<Long, String>> ids = new ArrayList<>();
+        return userSubscriptions.stream()
+                .map(UserSubscription.Dto.FullUserLess::getPlan)
+                .map(this::toIdNameQuestionnaire)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .collect(Collectors.toList());
+    }
 
-        if (subscription.isPresent()) {
-
-            SubscriptionPlan subPlan = subscriptionPlanService.getSubscriptionPlanById(subscription.get().getSubscriptions().get(0).getId());
-            Optional<Questionnaire> dietaryQuestionnaire = subPlan.getDietaryQuestionnaire();
-            Optional<Questionnaire> trainingQuestionnaire = subPlan.getTrainingQuestionnaire();
-            Optional<Questionnaire> combinedQuestionnaire = subPlan.getCombinedQuestionnaire();
-
-            dietaryQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
-            trainingQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
-            combinedQuestionnaire.ifPresent(questionnaire -> ids.add(Pair.of(questionnaire.getId(), questionnaire.getName())));
-
+    private Optional<Pair<Long, String>> toIdNameQuestionnaire(SubscriptionPlan.Dto.Full plan) {
+        Long questionnaireId = null;
+        if (plan.getDietaryQuestionnaireId().isPresent()) {
+            questionnaireId = plan.getDietaryQuestionnaireId().get();
         }
-        return ids;
-    }
 
-    private Optional<UserSubscriptionDTO> userToUserSubscription(User user) {
-        return userSubscriptionService.getUserActiveSubscriptions(user);
-    }
+        if (plan.getTrainingQuestionnaireId().isPresent()) {
+            questionnaireId = plan.getTrainingQuestionnaireId().get();
+        }
 
-    private boolean isSubscribedToPlanWithDiet(UserSubscriptionDTO user) {
-        return user.getSubscriptions().get(0).getDietaryQuestionnaire().isPresent();
+        if (plan.getCombinedQuestionnaireId().isPresent()) {
+            questionnaireId = plan.getCombinedQuestionnaireId().get();
+        }
+
+        try {
+            if (questionnaireId != null) {
+                Questionnaire questionnaire = questionnaireService.getQuestionnaire(questionnaireId);
+                return Optional.of(Pair.of(questionnaire.getId(), questionnaire.getName()));
+            }
+        } catch (NotFoundException ignored) { }
+
+        return Optional.empty();
     }
 }

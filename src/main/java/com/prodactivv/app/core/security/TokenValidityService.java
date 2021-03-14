@@ -4,7 +4,6 @@ import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.User.Roles;
-import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.service.UserService;
 import org.springframework.stereotype.Service;
 
@@ -60,7 +59,7 @@ public class TokenValidityService {
         return repository.save(token);
     }
 
-    public UserDTO getUser(String token) throws DisintegratedJwsException, NotFoundException {
+    public User.Dto.Full getUser(String token) throws DisintegratedJwsException, NotFoundException {
         Long id = Long.parseLong(jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID));
         return userService.getUserById(id);
     }

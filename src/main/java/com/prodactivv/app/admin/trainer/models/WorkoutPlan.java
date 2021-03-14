@@ -3,7 +3,6 @@ package com.prodactivv.app.admin.trainer.models;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
 import com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekManagerDTO;
 import lombok.*;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.util.*;

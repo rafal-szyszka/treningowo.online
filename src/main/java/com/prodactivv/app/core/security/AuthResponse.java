@@ -1,8 +1,8 @@
 package com.prodactivv.app.core.security;
 
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO.SimpleWorkoutPlanView;
-import com.prodactivv.app.user.model.UserDTO;
-import com.prodactivv.app.user.model.UserSubscriptionDTO.SimpleSubscriptionView;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserSubscription;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -18,8 +18,8 @@ public class AuthResponse {
     private String userEmail;
     private String userRole;
     private LocalDateTime validUntil;
-    private UserDTO user;
-    private SimpleSubscriptionView subscription;
+    private User.Dto.Full user;
+    private List<UserSubscription.Dto.FullUserLess> subscriptions;
     private List<SimpleWorkoutPlanView> workoutPlans;
 
 }

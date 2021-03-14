@@ -4,10 +4,12 @@ import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.repositories.UsersWorkoutPlanRepository;
+import com.prodactivv.app.admin.trainer.models.repositories.WorkoutPlanRepository;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -15,16 +17,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UsersWorkoutPlanService {
 
     public static final String MSG_PLAN_FOR_USER_NOT_FOUND = "Plan %s for user %s was not found!";
     private final UsersWorkoutPlanRepository repository;
     private final UserRepository userRepository;
+    private final WorkoutPlanRepository workoutPlanRepository;
 
-    public UsersWorkoutPlanService(UsersWorkoutPlanRepository repository, UserRepository userRepository) {
-        this.repository = repository;
-        this.userRepository = userRepository;
-    }
 
     public UsersWorkoutPlanDTO createUsersWorkoutPlan(Long userId, WorkoutPlan workoutPlan) throws UserNotFoundException {
         User user = userRepository.findById(userId).orElseThrow(new UserNotFoundException(userId));
@@ -43,6 +43,12 @@ public class UsersWorkoutPlanService {
     public List<UsersWorkoutPlanDTO> getUserWorkoutPlans(Long userId) {
         return repository.findAllByUserId(userId).stream()
                 .map(UsersWorkoutPlanDTO::of)
+                .collect(Collectors.toList());
+    }
+
+    public List<UsersWorkoutPlan.Dto.WorkoutPlanData> getUserWorkoutPlansData(Long userId) {
+        return repository.findAllByUserId(userId).stream()
+                .map(UsersWorkoutPlan.Dto.WorkoutPlanData::fromWorkoutPlan)
                 .collect(Collectors.toList());
     }
 
@@ -69,6 +75,19 @@ public class UsersWorkoutPlanService {
     public UsersWorkoutPlanDTO deactivate(Long id) throws NotFoundException {
         UsersWorkoutPlan usersWorkoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format("Plan %s not found", id)));
         usersWorkoutPlan.setIsActive(false);
+        return UsersWorkoutPlanDTO.of(repository.save(usersWorkoutPlan));
+    }
+
+    public String rename(Long id, String name) throws NotFoundException {
+        WorkoutPlan usersWorkoutPlan = workoutPlanRepository.findById(id).orElseThrow(new NotFoundException(String.format("Plan %s not found", id)));
+        usersWorkoutPlan.setName(name);
+        workoutPlanRepository.save(usersWorkoutPlan);
+        return usersWorkoutPlan.getName();
+    }
+
+    public UsersWorkoutPlanDTO setActiveDate(Long id, String date) throws NotFoundException {
+        UsersWorkoutPlan usersWorkoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format("Plan %s not found", id)));
+        usersWorkoutPlan.setCreatedAt(LocalDate.parse(date));
         return UsersWorkoutPlanDTO.of(repository.save(usersWorkoutPlan));
     }
 }

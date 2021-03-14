@@ -199,4 +199,22 @@ public class WorkoutPrepController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
+    @PutMapping(value = "/manage/plan/{id}/rename")
+    public ResponseEntity<String> renamePlan(@PathVariable Long id, @RequestParam String name) {
+        try {
+            return ResponseEntity.ok(usersWorkoutPlanService.rename(id, name));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/manage/plan/{id}/setActiveDate")
+    public ResponseEntity<UsersWorkoutPlanDTO> setActiveDate(@PathVariable Long id, @RequestParam String date) {
+        try {
+            return ResponseEntity.ok(usersWorkoutPlanService.setActiveDate(id, date));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

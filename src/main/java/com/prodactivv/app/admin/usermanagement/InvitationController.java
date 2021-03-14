@@ -13,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
-import static com.prodactivv.app.user.model.User.UserInvitationDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,18 +28,18 @@ public class InvitationController {
     }
 
     @PostMapping(value = "/admin/invite")
-    public ResponseEntity<UserInvite> inviteUser(@RequestBody UserInvitationDto userInvitation) {
+    public ResponseEntity<UserInvite> inviteUser(@RequestBody User.Dto.Invitation invitation) {
         try {
-            return ResponseEntity.ok(service.inviteUser(userInvitation));
+            return ResponseEntity.ok(service.inviteUser(invitation));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 
     @PostMapping(value = "/admin/invite/dietitian")
-    public ResponseEntity<UserInvite> inviteDietitian(@RequestBody UserInvitationDto userInvitation) {
+    public ResponseEntity<UserInvite> inviteDietitian(@RequestBody User.Dto.Invitation invitation) {
         try {
-            return ResponseEntity.ok(service.inviteDietitian(userInvitation));
+            return ResponseEntity.ok(service.inviteDietitian(invitation));
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }

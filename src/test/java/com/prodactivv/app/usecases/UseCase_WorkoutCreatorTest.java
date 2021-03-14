@@ -9,7 +9,6 @@ import com.prodactivv.app.admin.trainer.workout.WorkoutPlanService;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
 import org.junit.Before;
@@ -44,8 +43,7 @@ public class UseCase_WorkoutCreatorTest {
     @Autowired
     private ExerciseService exerciseService;
 
-    private final User user = User.builder()
-            .role(User.Roles.USER.getRoleName())
+    private final User.Dto.UserRegistration user = User.Dto.UserRegistration.builder()
             .sex("MALE")
             .email("not.taken.email@mail.com")
             .birthday(LocalDate.parse("1994-03-20"))
@@ -54,7 +52,7 @@ public class UseCase_WorkoutCreatorTest {
             .password("test")
             .build();
 
-    private UserDTO userDTO;
+    private User.Dto.Full userDTO;
     private UsersWorkoutPlanDTO usersWorkoutPlan;
     private Exercise exercise;
 

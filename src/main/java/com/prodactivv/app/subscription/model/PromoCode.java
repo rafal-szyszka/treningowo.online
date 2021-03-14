@@ -75,6 +75,10 @@ public class PromoCode {
         isActive = dto.isActive;
     }
 
+    public boolean isIndefinite() {
+        return isActive && validUntil == null;
+    }
+
     @Getter
     @Setter
     @Builder
@@ -89,6 +93,28 @@ public class PromoCode {
         private Boolean isIndefinite;
         private Boolean isActive;
         private List<Long> subscriptionPlans;
+
+    }
+
+    public static class Dto {
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Details {
+            private Long id;
+            private String code;
+            private Long discountPercent;
+
+            public static Details fromPromoCode(PromoCode promoCode) {
+                return builder()
+                        .id(promoCode.id)
+                        .code(promoCode.code)
+                        .discountPercent(promoCode.discountPercent)
+                        .build();
+            }
+        }
 
     }
 }

@@ -28,11 +28,16 @@ public class JwsSecurityFilter extends BasicAuthenticationFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (service.userHasAccessToRequest(request, token)) {
+        if (service.isPublicEndpoint(request.getRequestURI()) || service.userHasAccessToRequest(request, token)) {
             try {
-                SecurityContextHolder.getContext()
-                        .setAuthentication(service.createUsernamePasswordAuthToken(token));
-                service.refreshToken(token);
+                if (service.isPublicEndpoint(request.getRequestURI())) {
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(service.createPublicAuthToken());
+                } else {
+                    SecurityContextHolder.getContext()
+                            .setAuthentication(service.createUsernamePasswordAuthToken(token));
+                    service.refreshToken(token);
+                }
                 super.doFilterInternal(request, response, chain);
             } catch (NotFoundException | DisintegratedJwsException e) {
                 getAuthenticationEntryPoint().commence(

@@ -6,6 +6,8 @@ import lombok.*;
 import javax.persistence.*;
 import java.time.LocalDate;
 
+import static java.time.temporal.ChronoUnit.DAYS;
+
 @Getter
 @Setter
 @Builder
@@ -30,5 +32,53 @@ public class UserSubscription {
 
     @Column(columnDefinition = "boolean DEFAULT true")
     private Boolean isActive;
+
+    private LocalDate bought;
+
+    public static class Dto {
+
+        @Getter
+        @Setter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor(access = AccessLevel.PROTECTED)
+        public static class FullUserLess {
+            private Long id;
+            private Boolean isActive;
+            private Long daysLeft;
+            private LocalDate until;
+            private LocalDate bought;
+            private SubscriptionPlan.Dto.Full plan;
+
+            public static FullUserLess fromUserSubscription(UserSubscription userSubscription) {
+                return builder()
+                        .id(userSubscription.id)
+                        .isActive(userSubscription.until.isAfter(LocalDate.now()))
+                        .daysLeft(DAYS.between(LocalDate.now(), userSubscription.until))
+                        .until(userSubscription.until)
+                        .plan(SubscriptionPlan.Dto.Full.fromSubscriptionPlan(userSubscription.plan))
+                        .bought(userSubscription.bought)
+                        .build();
+            }
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @NoArgsConstructor
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Full {
+            private FullUserLess subscription;
+            private User.Dto.Full user;
+
+            public static Full fromUserSubscription(UserSubscription userSubscription) {
+               return builder()
+                       .subscription(FullUserLess.fromUserSubscription(userSubscription))
+                       .user(User.Dto.Full.fromUser(userSubscription.user))
+                       .build();
+            }
+        }
+
+    }
 
 }

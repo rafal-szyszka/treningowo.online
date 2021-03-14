@@ -2,11 +2,12 @@ package com.prodactivv.app.admin.trainer.models;
 
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan.WorkoutPlanManagerDTO;
 import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserDTO;
 import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @Getter
 @Setter
@@ -39,7 +40,7 @@ public class UsersWorkoutPlan {
     public static class UsersWorkoutPlanDTO {
         private Long id;
         private WorkoutPlanManagerDTO workoutPlan;
-        private UserDTO user;
+        private User.Dto.Full user;
         private Boolean isActive;
         private LocalDate createdAt;
         private LocalDate until;
@@ -48,7 +49,7 @@ public class UsersWorkoutPlan {
             return new UsersWorkoutPlanDTO(
                     plan.id,
                     WorkoutPlanManagerDTO.of(plan.workoutPlan),
-                    UserDTO.of(plan.user),
+                    User.Dto.Full.fromUser(plan.user),
                     plan.isActive,
                     plan.createdAt,
                     plan.createdAt.plusWeeks(plan.workoutPlan.getActivityWeeks().size())
@@ -83,6 +84,33 @@ public class UsersWorkoutPlan {
                         plan.createdAt,
                         plan.createdAt.plusWeeks(plan.workoutPlan.getActivityWeeks().size())
                 );
+            }
+        }
+    }
+
+    public static class Dto {
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class WorkoutPlanData {
+            private Long id;
+            private String name;
+            private Boolean isActive;
+            private Long daysLeft;
+            private LocalDate createdAt;
+            private LocalDate until;
+
+            public static WorkoutPlanData fromWorkoutPlan(UsersWorkoutPlan userPlan) {
+                return builder()
+                        .id(userPlan.id)
+                        .name(userPlan.workoutPlan.getName())
+                        .isActive(userPlan.isActive)
+                        .createdAt(userPlan.createdAt)
+                        .until(userPlan.createdAt.plusWeeks(userPlan.workoutPlan.getActivityWeeks().size()))
+                        .daysLeft(DAYS.between(LocalDate.now(), userPlan.createdAt.plusWeeks(userPlan.workoutPlan.getActivityWeeks().size())))
+                        .build();
             }
         }
 

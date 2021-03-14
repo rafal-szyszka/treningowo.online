@@ -1,7 +1,6 @@
 package com.prodactivv.app.usecases;
 
 import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserDTO;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
 import org.junit.Test;
@@ -13,7 +12,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -25,7 +25,7 @@ public class UseCase_UserRegistrationTest {
     @Autowired
     private RegistrationService registrationService;
 
-    private final User user = User.builder()
+    private final User.Dto.UserRegistration user = User.Dto.UserRegistration.builder()
             .sex("MALE")
             .email("test@mail.com")
             .birthday(LocalDate.parse("1994-03-20"))
@@ -34,7 +34,7 @@ public class UseCase_UserRegistrationTest {
             .password("test")
             .build();
 
-    private UserDTO userDTO;
+    private User.Dto.Full userDTO;
 
     @Test
     public void test_registerUser_shouldRegisterUserAndCalculateItsBirthdayDate() {
@@ -44,7 +44,6 @@ public class UseCase_UserRegistrationTest {
             assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
             assertEquals("test@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
-            assertNotEquals("test", userDTO.getPassword());
         } catch (UserRegistrationException e) {
             assertNull(e);
         }
