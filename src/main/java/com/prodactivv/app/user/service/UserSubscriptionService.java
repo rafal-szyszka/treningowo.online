@@ -36,7 +36,7 @@ public class UserSubscriptionService {
                 .collect(Collectors.toList());
     }
 
-    public List<UserSubscription.Dto.FullUserLess> getUserSubscriptions(User.Dto.Full user) {
+    public List<UserSubscription.Dto.FullUserLess> getUserSubscriptions(User.Dto.Simple user) {
         return repository.findAllUserSubscriptions(user.getId())
                 .stream()
                 .map(UserSubscription.Dto.FullUserLess::fromUserSubscription)

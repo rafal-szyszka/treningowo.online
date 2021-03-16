@@ -199,7 +199,7 @@ public class PaymentRequest {
         @Builder
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Information {
-            private User.Dto.Full user;
+            private User.Dto.Simple user;
             private SubscriptionPlan.Dto.QuestionnairesLess plan;
             private PromoCode.Dto.Details promoCode;
             private Integer finalPrice;
@@ -217,7 +217,7 @@ public class PaymentRequest {
                 }
 
                 return builder()
-                        .user(User.Dto.Full.fromUser(paymentRequest.user))
+                        .user(User.Dto.Simple.fromUser(paymentRequest.user))
                         .plan(plan)
                         .promoCode(promoCode)
                         .finalPrice(paymentRequest.finalPrice)

@@ -2,6 +2,7 @@ package com.prodactivv.app.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
+import com.prodactivv.app.core.files.DatabaseFile;
 import lombok.*;
 import org.bouncycastle.util.encoders.Hex;
 
@@ -46,6 +47,12 @@ public class User {
     private String sex;
 
     private String role;
+
+    private Boolean acceptedTermsOfUse;
+
+    private Boolean acceptedPrivacyPolicy;
+
+    private Boolean acceptedWaiverOfRightsToWithdraw;
 
     @PrePersist
     public void hashPassword() throws NoSuchAlgorithmException {
@@ -93,7 +100,7 @@ public class User {
         @Setter
         @Builder
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
-        public static class Full {
+        public static class Simple {
             private Long id;
             private String email;
             private String name;
@@ -105,7 +112,7 @@ public class User {
             private String role;
             private String token;
 
-            public static Full fromUser(User user) {
+            public static Simple fromUser(User user) {
                 return builder()
                         .id(user.getId())
                         .email(user.getEmail())
@@ -155,6 +162,9 @@ public class User {
             private LocalDate birthday;
             private String password;
             private String sex;
+            private Boolean termsOfUse;
+            private Boolean privacyPolicy;
+            private Boolean waiverOfRightsToWithdraw;
 
             public User toUser() {
                 return User.builder()
@@ -164,6 +174,9 @@ public class User {
                         .birthday(birthday)
                         .password(password)
                         .sex(sex)
+                        .acceptedTermsOfUse(termsOfUse)
+                        .acceptedPrivacyPolicy(privacyPolicy)
+                        .acceptedWaiverOfRightsToWithdraw(waiverOfRightsToWithdraw)
                         .build();
             }
 
@@ -175,7 +188,7 @@ public class User {
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Subscriptions {
             private List<UserSubscription.Dto.FullUserLess> subscriptions;
-            private Full user;
+            private Simple user;
 
             public boolean isSubscribedToPlanWithDiet() {
                 return subscriptions.stream().anyMatch(subscription -> subscription.getPlan().hasDietPlan());
@@ -192,7 +205,23 @@ public class User {
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Workouts {
             private List<UsersWorkoutPlan.Dto.WorkoutPlanData> workoutPlans;
-            private Full user;
+            private Simple user;
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Diet {
+            private Simple user;
+            private DatabaseFile.Dto.Viewable diet;
+
+            public static Diet fromUserDiet(UserDiet userDiet) {
+                return builder()
+                        .user(Simple.fromUser(userDiet.getUser()))
+                        .diet(DatabaseFile.Dto.Viewable.fromDatabaseFile(userDiet.getDietFile()))
+                        .build();
+            }
         }
 
         @Getter
@@ -202,7 +231,18 @@ public class User {
         public static class SubscriptionsAndWorkouts {
             private List<UserSubscription.Dto.FullUserLess> subscriptions;
             private List<UsersWorkoutPlan.Dto.WorkoutPlanData> workoutPlans;
-            private Full user;
+            private Simple user;
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Full {
+            private Simple user;
+            private List<UserSubscription.Dto.FullUserLess> subscriptions;
+            private List<UsersWorkoutPlan.Dto.WorkoutPlanData> workoutPlans;
+            private List<Diet> diets;
 
             public boolean isSubscribedToPlanWithDiet() {
                 return subscriptions.stream().anyMatch(subscription -> subscription.getPlan().hasDietPlan());

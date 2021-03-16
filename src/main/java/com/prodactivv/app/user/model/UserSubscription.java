@@ -69,12 +69,12 @@ public class UserSubscription {
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Full {
             private FullUserLess subscription;
-            private User.Dto.Full user;
+            private User.Dto.Simple user;
 
             public static Full fromUserSubscription(UserSubscription userSubscription) {
                return builder()
                        .subscription(FullUserLess.fromUserSubscription(userSubscription))
-                       .user(User.Dto.Full.fromUser(userSubscription.user))
+                       .user(User.Dto.Simple.fromUser(userSubscription.user))
                        .build();
             }
         }

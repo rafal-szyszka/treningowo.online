@@ -7,6 +7,8 @@ import com.prodactivv.app.core.exceptions.InvalidCredentialsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserDiet;
+import com.prodactivv.app.user.model.UserDietRepository;
 import com.prodactivv.app.user.model.UserRepository;
 import com.prodactivv.app.user.service.UserSubscriptionService;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class AuthService {
     private final TokenValidityService tokenValidityService;
     private final UserSubscriptionService subscriptionService;
     private final UsersWorkoutPlanService workoutPlanService;
+    private final UserDietRepository dietRepository;
 
     @Value("${app.security.access.control.user-level.url.prefix}")
     private String accessControlUserLevelUrlPrefix;
@@ -57,7 +60,7 @@ public class AuthService {
 
     public AuthResponse getTokenData(String token) throws NotFoundException, DisintegratedJwsException, UserNotFoundException {
         TokenValidity tokenValidity = tokenValidityService.getTokenValidity(token);
-        User.Dto.Full userDto = getUser(token);
+        User.Dto.Simple userDto = getUser(token);
 
         if (User.Roles.isUser(userDto.getRole())) {
             return AuthResponse.builder()
@@ -68,6 +71,7 @@ public class AuthService {
                     .user(userDto)
                     .subscriptions(subscriptionService.getUserSubscriptions(userDto))
                     .workoutPlans(workoutPlanService.getUserWorkoutPlans(userDto.getId()).stream().map(SimpleWorkoutPlanView::of).collect(Collectors.toList()))
+                    .diets(dietRepository.findAllUserDiets(userDto.getId()).stream().map(UserDiet.Dto.Diet::fromUserDiet).collect(Collectors.toList()))
                     .build();
         } else {
             return AuthResponse.builder()
@@ -80,7 +84,7 @@ public class AuthService {
         }
     }
 
-    public User.Dto.Full getUser(String token) throws NotFoundException, DisintegratedJwsException {
+    public User.Dto.Simple getUser(String token) throws NotFoundException, DisintegratedJwsException {
         return tokenValidityService.getUser(token);
     }
 
@@ -103,7 +107,7 @@ public class AuthService {
     }
 
     public UsernamePasswordAuthenticationToken createUsernamePasswordAuthToken(String token) throws NotFoundException, DisintegratedJwsException {
-        User.Dto.Full user = tokenValidityService.getUser(token);
+        User.Dto.Simple user = tokenValidityService.getUser(token);
         return new UsernamePasswordAuthenticationToken(
                 user.getEmail(),
                 token,

@@ -1,12 +1,14 @@
 package com.prodactivv.app.core.files;
 
 import com.prodactivv.app.config.DatabaseFiles;
+import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +20,7 @@ import java.time.format.DateTimeFormatter;
 public class DatabaseFileService {
 
     public enum StorageType {
-        LOCAL("LOCAL"), GOOGLE_DRIVE("GOOGLE_DRIVE"), DROPBOX("DROPBOX"), ONE_DRIVE("ONE_DRIVE");
+        LOCAL("LOCAL"), LOCAL_SAFE("LOCAL_SAFE"), GOOGLE_DRIVE("GOOGLE_DRIVE"), DROPBOX("DROPBOX"), ONE_DRIVE("ONE_DRIVE");
 
         @Getter
         private final String type;
@@ -31,24 +33,39 @@ public class DatabaseFileService {
     private final DatabaseFileRepository databaseFileRepository;
     private final DatabaseFiles databaseFiles;
 
+    public InputStream downloadFile(Long id) throws NotFoundException, UnreachableFileStorageTypeException, FileNotFoundException {
+        DatabaseFile file = databaseFileRepository.findById(id).orElseThrow(new NotFoundException(String.format("File %s not found", id)));
 
-    public DatabaseFile uploadFileToLocalStorage(MultipartFile file) throws IOException {
-        String fileName;
-        if (file.getOriginalFilename() != null) {
-             fileName = file.getOriginalFilename().replaceAll("[\\s\\/\\\\\\|]", "");
-        } else {
-            fileName = "file_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        File initialFile = getFile(file);
+        return new FileInputStream(initialFile);
+    }
+
+    private File getFile(DatabaseFile file) throws UnreachableFileStorageTypeException {
+        if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL_SAFE.type)) {
+            return new File(databaseFiles.getLocalSafeStoragePath() + file.getFileName());
+        } else if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL.type)) {
+            return new File(databaseFiles.getLocalStoragePath() + file.getFileName());
         }
 
-        Path path = Paths.get(databaseFiles.getLocalStoragePath() + fileName);
+        throw new UnreachableFileStorageTypeException(String.format("Storage type %s not known", file.getFileLocationType()));
+    }
 
-        Files.write(path, file.getBytes());
+    public DatabaseFile uploadFileToLocalStorage(MultipartFile file) throws IOException {
+        return uploadFileLocal(file, StorageType.LOCAL, databaseFiles.getLocalStoragePath());
+    }
 
-        return createDatabaseFile(path, StorageType.LOCAL.type);
+    public DatabaseFile uploadFileToLocalSafeStorage(MultipartFile file) throws IOException {
+        return uploadFileLocal(file, StorageType.LOCAL_SAFE, databaseFiles.getLocalSafeStoragePath());
     }
 
     public DatabaseFile uploadFile(StorageType storageType, MultipartFile file) throws IOException, UnsupportedStorageTypeException {
         switch (storageType) {
+            case LOCAL_SAFE:
+                if (!file.isEmpty()) {
+                    return uploadFileToLocalSafeStorage(file);
+                }
+
+                throw new IOException("Empty file");
             case LOCAL:
                 if (!file.isEmpty()) {
                     return uploadFileToLocalStorage(file);
@@ -61,6 +78,19 @@ public class DatabaseFileService {
             default:
                 throw new UnsupportedStorageTypeException(storageType);
         }
+    }
+
+    private DatabaseFile uploadFileLocal(MultipartFile file, StorageType type, String filePath) throws IOException {
+        String fileName;
+        if (file.getOriginalFilename() != null) {
+            fileName = file.getOriginalFilename().replaceAll("[\\s\\/\\\\\\|]", "");
+        } else {
+            fileName = "file_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        }
+
+        Path path = Paths.get(filePath + fileName);
+        Files.write(path, file.getBytes());
+        return createDatabaseFile(path, type.type);
     }
 
     private DatabaseFile createDatabaseFile(Path path, String type) {

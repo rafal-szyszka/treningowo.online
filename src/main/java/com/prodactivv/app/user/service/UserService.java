@@ -6,17 +6,22 @@ import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
+import com.prodactivv.app.core.files.DatabaseFileService;
+import com.prodactivv.app.core.files.UnsupportedStorageTypeException;
 import com.prodactivv.app.core.security.JwtUtils;
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
 import com.prodactivv.app.subscription.service.SubscriptionPlanService;
-import com.prodactivv.app.user.model.User;
-import com.prodactivv.app.user.model.UserRepository;
-import com.prodactivv.app.user.model.UserSubscription;
+import com.prodactivv.app.user.model.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -31,37 +36,43 @@ public class UserService {
     private final JwtUtils jwtUtils;
 
     private final UserRepository repository;
+    private final UserDietRepository dietRepository;
     private final SubscriptionPlanService subscriptionPlanService;
     private final UserSubscriptionService userSubscriptionService;
     private final UsersWorkoutPlanService usersWorkoutPlanService;
     private final QuestionnaireService questionnaireService;
+    private final DatabaseFileService fileService;
 
-    public List<User.Dto.SubscriptionsAndWorkouts> getUsersWithSubscriptions(String token) throws DisintegratedJwsException {
+    public InputStream getDietFile(Long id) throws FileNotFoundException, NotFoundException, UnreachableFileStorageTypeException {
+        return fileService.downloadFile(id);
+    }
+
+    public List<User.Dto.Full> getUsersWithSubscriptions(String token) throws DisintegratedJwsException {
         String demanderRole = jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ROLE);
 
         if (User.Roles.isDietitian(demanderRole)) {
             return repository.findAllUsers().stream()
-                    .map(this::getUserWithSubscriptionsAndWorkouts)
-                    .filter(User.Dto.SubscriptionsAndWorkouts::isSubscribedToPlanWithDiet)
+                    .map(this::getFullUser)
+                    .filter(User.Dto.Full::isSubscribedToPlanWithDiet)
                     .collect(Collectors.toList());
         } else {
             return repository.findAllUsers().stream()
-                    .map(this::getUserWithSubscriptionsAndWorkouts)
-                    .filter(User.Dto.SubscriptionsAndWorkouts::isSubscribedToPlanWithTrainings)
+                    .map(this::getFullUser)
+                    .filter(User.Dto.Full::isSubscribedToPlanWithTrainings)
                     .collect(Collectors.toList());
         }
     }
 
-    public List<User.Dto.Full> getUsersWithSubscriptions() {
+    public List<User.Dto.Simple> getUsersWithSubscriptions() {
         return repository.findAllUsers()
                 .stream()
                 .map(this::updateAge)
-                .map(User.Dto.Full::fromUser)
+                .map(User.Dto.Simple::fromUser)
                 .collect(Collectors.toList());
     }
 
-    public User.Dto.Full getUserById(Long id) throws NotFoundException {
-        return User.Dto.Full.fromUser(getUser(id));
+    public User.Dto.Simple getUserById(Long id) throws NotFoundException {
+        return User.Dto.Simple.fromUser(getUser(id));
     }
 
     public User getUser(Long id) throws NotFoundException {
@@ -92,19 +103,21 @@ public class UserService {
         );
     }
 
-    public User.Dto.SubscriptionsAndWorkouts getUserWithSubscriptionsAndWorkouts(Long id) throws UserNotFoundException {
+    public User.Dto.Full getFullUser(Long id) throws UserNotFoundException {
         User user = repository.findById(id).orElseThrow(new UserNotFoundException(id));
-        return getUserWithSubscriptionsAndWorkouts(user);
+        return getFullUser(user);
     }
 
-    public User.Dto.SubscriptionsAndWorkouts getUserWithSubscriptionsAndWorkouts(User user) {
+    public User.Dto.Full getFullUser(User user) {
         List<UserSubscription.Dto.FullUserLess> subscriptions = userSubscriptionService.getUserSubscriptions(user);
         List<UsersWorkoutPlan.Dto.WorkoutPlanData> userWorkoutPlansData = usersWorkoutPlanService.getUserWorkoutPlansData(user.getId());
+        List<User.Dto.Diet> userDiets = dietRepository.findAllUserDiets(user.getId()).stream().map(User.Dto.Diet::fromUserDiet).collect(Collectors.toList());
 
-        return User.Dto.SubscriptionsAndWorkouts.builder()
-                .user(User.Dto.Full.fromUser(user))
+        return User.Dto.Full.builder()
+                .user(User.Dto.Simple.fromUser(user))
                 .subscriptions(subscriptions)
                 .workoutPlans(userWorkoutPlansData)
+                .diets(userDiets)
                 .build();
     }
 
@@ -118,6 +131,14 @@ public class UserService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    public User.Dto.Diet addDiet(Long userId, MultipartFile file) throws NotFoundException, IOException, UnsupportedStorageTypeException {
+        UserDiet userDiet = new UserDiet();
+        userDiet.setUser(getUser(userId));
+        userDiet.setDietFile(fileService.uploadFile(DatabaseFileService.StorageType.LOCAL, file));
+
+        return User.Dto.Diet.fromUserDiet(dietRepository.save(userDiet));
     }
 
     private Optional<Pair<Long, String>> toIdNameQuestionnaire(SubscriptionPlan.Dto.Full plan) {

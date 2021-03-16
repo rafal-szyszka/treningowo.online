@@ -3,6 +3,7 @@ package com.prodactivv.app.user.controller;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prodactivv.app.admin.payments.model.PaymentRequest;
 import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
@@ -27,10 +28,10 @@ public class RegistrationController {
     }
 
     @PostMapping(value = "/sign-up")
-    public ResponseEntity<User.Dto.Full> signUp(@RequestBody User.Dto.UserRegistration user) {
+    public ResponseEntity<User.Dto.Simple> signUp(@RequestBody User.Dto.UserRegistration user) {
         try {
             return ResponseEntity.ok(service.signUp(user));
-        } catch (UserRegistrationException e) {
+        } catch (UserRegistrationException | MandatoryRegulationsNotAcceptedException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
             );

@@ -8,6 +8,7 @@ import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
 import com.prodactivv.app.admin.trainer.workout.WorkoutPlanService;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
@@ -50,14 +51,16 @@ public class UseCase_WorkoutCreatorTest {
             .name("TEST")
             .lastName("TEST")
             .password("test")
+            .termsOfUse(true)
+            .privacyPolicy(true)
             .build();
 
-    private User.Dto.Full userDTO;
+    private User.Dto.Simple userDTO;
     private UsersWorkoutPlanDTO usersWorkoutPlan;
     private Exercise exercise;
 
     @Before
-    public void setUp() throws UserRegistrationException, ExerciseNotFoundException, UserNotFoundException {
+    public void setUp() throws UserRegistrationException, ExerciseNotFoundException, UserNotFoundException, MandatoryRegulationsNotAcceptedException {
         userDTO = registrationService.signUp(user);
         usersWorkoutPlan = usersWorkoutPlanService.createUsersWorkoutPlan(
                 userDTO.getId(),

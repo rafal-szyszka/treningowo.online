@@ -59,7 +59,7 @@ public class TokenValidityService {
         return repository.save(token);
     }
 
-    public User.Dto.Full getUser(String token) throws DisintegratedJwsException, NotFoundException {
+    public User.Dto.Simple getUser(String token) throws DisintegratedJwsException, NotFoundException {
         Long id = Long.parseLong(jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID));
         return userService.getUserById(id);
     }

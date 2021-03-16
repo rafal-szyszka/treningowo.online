@@ -1,5 +1,6 @@
 package com.prodactivv.app.usecases;
 
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
@@ -34,11 +35,14 @@ public class UseCase_UserRegistrationTest {
             .password("test")
             .build();
 
-    private User.Dto.Full userDTO;
+    private User.Dto.Simple userDTO;
 
-    @Test
-    public void test_registerUser_shouldRegisterUserAndCalculateItsBirthdayDate() {
+    @Test(expected = MandatoryRegulationsNotAcceptedException.class)
+    public void test_registerUser_shouldThrowMandatoryRegulationsNotAcceptedException_1() throws MandatoryRegulationsNotAcceptedException {
         try {
+            user.setTermsOfUse(false);
+            user.setPrivacyPolicy(true);
+
             userDTO = registrationService.signUp(user);
 
             assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
@@ -49,4 +53,51 @@ public class UseCase_UserRegistrationTest {
         }
     }
 
+    @Test(expected = MandatoryRegulationsNotAcceptedException.class)
+    public void test_registerUser_shouldThrowMandatoryRegulationsNotAcceptedException_2() throws MandatoryRegulationsNotAcceptedException {
+        try {
+            user.setTermsOfUse(true);
+            user.setPrivacyPolicy(false);
+
+            userDTO = registrationService.signUp(user);
+
+            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("user", userDTO.getRole());
+        } catch (UserRegistrationException e) {
+            assertNull(e);
+        }
+    }
+
+    @Test(expected = MandatoryRegulationsNotAcceptedException.class)
+    public void test_registerUser_shouldThrowMandatoryRegulationsNotAcceptedException_3() throws MandatoryRegulationsNotAcceptedException {
+        try {
+            user.setTermsOfUse(false);
+            user.setPrivacyPolicy(false);
+
+            userDTO = registrationService.signUp(user);
+
+            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("user", userDTO.getRole());
+        } catch (UserRegistrationException e) {
+            assertNull(e);
+        }
+    }
+
+    @Test
+    public void test_registerUser_shouldRegisterUserAndCalculateItsBirthdayDate() {
+        try {
+            user.setTermsOfUse(true);
+            user.setPrivacyPolicy(true);
+
+            userDTO = registrationService.signUp(user);
+
+            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("user", userDTO.getRole());
+        } catch (UserRegistrationException | MandatoryRegulationsNotAcceptedException e) {
+            assertNull(e);
+        }
+    }
 }

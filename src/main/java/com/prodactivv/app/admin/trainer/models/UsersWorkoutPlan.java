@@ -40,7 +40,7 @@ public class UsersWorkoutPlan {
     public static class UsersWorkoutPlanDTO {
         private Long id;
         private WorkoutPlanManagerDTO workoutPlan;
-        private User.Dto.Full user;
+        private User.Dto.Simple user;
         private Boolean isActive;
         private LocalDate createdAt;
         private LocalDate until;
@@ -49,7 +49,7 @@ public class UsersWorkoutPlan {
             return new UsersWorkoutPlanDTO(
                     plan.id,
                     WorkoutPlanManagerDTO.of(plan.workoutPlan),
-                    User.Dto.Full.fromUser(plan.user),
+                    User.Dto.Simple.fromUser(plan.user),
                     plan.isActive,
                     plan.createdAt,
                     plan.createdAt.plusWeeks(plan.workoutPlan.getActivityWeeks().size())

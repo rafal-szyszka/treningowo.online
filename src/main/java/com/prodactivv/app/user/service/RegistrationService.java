@@ -12,6 +12,7 @@ import com.prodactivv.app.subscription.service.SubscriptionPlanService;
 import com.prodactivv.app.admin.payments.model.PaymentRequest;
 import com.prodactivv.app.admin.payments.model.PaymentRequest.PaymentRequestBuilder;
 import com.prodactivv.app.admin.payments.model.PaymentRequestRepository;
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,23 +41,28 @@ public class RegistrationService {
 
     private final P24Defaults p24Defaults;
 
-    public User.Dto.Full signUp(User.Dto.UserRegistration userRegDto) throws UserRegistrationException {
+    public User.Dto.Simple signUp(User.Dto.UserRegistration userRegDto) throws UserRegistrationException, MandatoryRegulationsNotAcceptedException {
         User user = userRegDto.toUser();
-        try {
-            if (userRepository.findUserByEmail(user.getEmail()).isEmpty()) {
-                user.setSignedUpDate(LocalDate.now());
-                user.setAge(userService.calculateUserAge(user));
-                user.setRole(User.Roles.USER.getRoleName());
-                User.Dto.Full userDto = User.Dto.Full.fromUser(userRepository.save(user));
-                userDto.setToken(authService.generateTokenForUser(user).getToken());
-                return userDto;
-            } else {
-                throw new UserRegistrationException("Email is already taken");
+
+        if (userRegDto.getPrivacyPolicy() && userRegDto.getTermsOfUse()) {
+            try {
+                if (userRepository.findUserByEmail(user.getEmail()).isEmpty()) {
+                    user.setSignedUpDate(LocalDate.now());
+                    user.setAge(userService.calculateUserAge(user));
+                    user.setRole(User.Roles.USER.getRoleName());
+                    User.Dto.Simple userDto = User.Dto.Simple.fromUser(userRepository.save(user));
+                    userDto.setToken(authService.generateTokenForUser(user).getToken());
+                    return userDto;
+                } else {
+                    throw new UserRegistrationException("Email is already taken");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new UserRegistrationException(e.getMessage());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new UserRegistrationException(e.getMessage());
         }
+
+        throw new MandatoryRegulationsNotAcceptedException();
     }
 
     public String createSubRequestToken(Long userId, Optional<Long> planId, Optional<String> codeId) throws NotFoundException {
