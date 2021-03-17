@@ -28,6 +28,10 @@ public class DatabaseFileService {
         StorageType(String type) {
             this.type = type;
         }
+
+        public static boolean isLocalStorage(String type) {
+            return type.equalsIgnoreCase(LOCAL.type) || type.equalsIgnoreCase(LOCAL_SAFE.type);
+        }
     }
 
     private final DatabaseFileRepository databaseFileRepository;
@@ -40,14 +44,19 @@ public class DatabaseFileService {
         return new FileInputStream(initialFile);
     }
 
-    private File getFile(DatabaseFile file) throws UnreachableFileStorageTypeException {
-        if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL_SAFE.type)) {
-            return new File(databaseFiles.getLocalSafeStoragePath() + file.getFileName());
-        } else if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL.type)) {
-            return new File(databaseFiles.getLocalStoragePath() + file.getFileName());
+    public void deleteFile(DatabaseFile file) throws UnsupportedStorageTypeException, IOException {
+        if (StorageType.isLocalStorage(file.getFileLocationType())) {
+            Path fileToDeletePath;
+            if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL.type)) {
+                fileToDeletePath = Paths.get(databaseFiles.getLocalStoragePath() + file.getFileName());
+            } else {
+                fileToDeletePath = Paths.get(databaseFiles.getLocalSafeStoragePath() + file.getFileName());
+            }
+            Files.delete(fileToDeletePath);
+            databaseFileRepository.delete(file);
+        } else {
+            throw new UnsupportedStorageTypeException(file.getFileLocationType());
         }
-
-        throw new UnreachableFileStorageTypeException(String.format("Storage type %s not known", file.getFileLocationType()));
     }
 
     public DatabaseFile uploadFileToLocalStorage(MultipartFile file) throws IOException {
@@ -101,5 +110,15 @@ public class DatabaseFileService {
                 .build();
 
         return databaseFileRepository.save(databaseFile);
+    }
+
+    private File getFile(DatabaseFile file) throws UnreachableFileStorageTypeException {
+        if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL_SAFE.type)) {
+            return new File(databaseFiles.getLocalSafeStoragePath() + file.getFileName());
+        } else if (file.getFileLocationType().equalsIgnoreCase(StorageType.LOCAL.type)) {
+            return new File(databaseFiles.getLocalStoragePath() + file.getFileName());
+        }
+
+        throw new UnreachableFileStorageTypeException(String.format("Storage type %s not known", file.getFileLocationType()));
     }
 }

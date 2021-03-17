@@ -15,6 +15,12 @@ public class HashGenerator {
         return DigestUtils.sha256Hex(builder.toString());
     }
 
+    public String generateSha384Hash(List<String> parts) {
+        StringBuilder builder = new StringBuilder();
+        parts.forEach(builder::append);
+        return DigestUtils.sha3_256Hex(builder.toString());
+    }
+
     public String generateRandom(int limit) {
         int leftLimit = 48; // numeral '0'
         int rightLimit = 122; // letter 'z'

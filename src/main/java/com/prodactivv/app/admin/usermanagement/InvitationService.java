@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -50,8 +51,9 @@ public class InvitationService {
         throw new InvitationExpiredException(String.format("%s expired", hash));
     }
 
-    public User acceptInvite(String hash, User user) throws NotFoundException, InvitationExpiredException {
+    public User acceptInvite(String hash, User.Dto.UserInvitationData userData) throws NotFoundException, InvitationExpiredException, NoSuchAlgorithmException {
         UserInvite userInvite = getInviteByHash(hash);
+        User user = userData.toUser();
         user.setRole(userInvite.getRole());
         user.setSignedUpDate(LocalDate.now());
         user.setAge(userService.calculateUserAge(user));

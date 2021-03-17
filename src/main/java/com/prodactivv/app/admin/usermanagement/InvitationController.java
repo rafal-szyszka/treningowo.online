@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 
@@ -55,10 +56,10 @@ public class InvitationController {
     }
 
     @PostMapping(value = "/public/invite/accept/{hash}")
-    public ResponseEntity<User> acceptInvite(@PathVariable String hash, @RequestBody User user) {
+    public ResponseEntity<User> acceptInvite(@PathVariable String hash, @RequestBody User.Dto.UserInvitationData user) {
         try {
             return ResponseEntity.ok(service.acceptInvite(hash, user));
-        } catch (NotFoundException | InvitationExpiredException e) {
+        } catch (NotFoundException | InvitationExpiredException | NoSuchAlgorithmException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

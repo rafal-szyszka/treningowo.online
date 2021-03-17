@@ -68,6 +68,15 @@ public class UserController {
         }
     }
 
+    @DeleteMapping(value = "/admin/user/diet/{dietId}")
+    public void uploadDiet(@PathVariable Long dietId) {
+        try {
+            userService.deleteDiet(dietId);
+        } catch (NotFoundException | IOException | UnsupportedStorageTypeException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @GetMapping(value = "/user/subscription/questionnaires")
     public ResponseEntity<List<Pair<Long, String>>> getUserSubscriptionPlanQuestionnaires(@RequestHeader(value = HttpHeaders.AUTHORIZATION) String token) {
         try {

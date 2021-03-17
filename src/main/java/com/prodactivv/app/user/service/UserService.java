@@ -47,6 +47,10 @@ public class UserService {
         return fileService.downloadFile(id);
     }
 
+    public User getUserByEmail(String email) throws NotFoundException {
+        return repository.findUserByEmail(email).orElseThrow(new NotFoundException(String.format("User %s not found!", email)));
+    }
+
     public List<User.Dto.Full> getUsersWithSubscriptions(String token) throws DisintegratedJwsException {
         String demanderRole = jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ROLE);
 
@@ -111,7 +115,7 @@ public class UserService {
     public User.Dto.Full getFullUser(User user) {
         List<UserSubscription.Dto.FullUserLess> subscriptions = userSubscriptionService.getUserSubscriptions(user);
         List<UsersWorkoutPlan.Dto.WorkoutPlanData> userWorkoutPlansData = usersWorkoutPlanService.getUserWorkoutPlansData(user.getId());
-        List<User.Dto.Diet> userDiets = dietRepository.findAllUserDiets(user.getId()).stream().map(User.Dto.Diet::fromUserDiet).collect(Collectors.toList());
+        List<User.Dto.DietUserLess> userDiets = dietRepository.findAllUserDiets(user.getId()).stream().map(User.Dto.DietUserLess::fromUserDiet).collect(Collectors.toList());
 
         return User.Dto.Full.builder()
                 .user(User.Dto.Simple.fromUser(user))
@@ -139,6 +143,12 @@ public class UserService {
         userDiet.setDietFile(fileService.uploadFile(DatabaseFileService.StorageType.LOCAL, file));
 
         return User.Dto.Diet.fromUserDiet(dietRepository.save(userDiet));
+    }
+
+    public void deleteDiet(Long dietId) throws NotFoundException, IOException, UnsupportedStorageTypeException {
+        UserDiet userDiet = dietRepository.findById(dietId).orElseThrow(new NotFoundException(String.format("Diet %s not found!", dietId)));
+        dietRepository.delete(userDiet);
+        fileService.deleteFile(userDiet.getDietFile());
     }
 
     private Optional<Pair<Long, String>> toIdNameQuestionnaire(SubscriptionPlan.Dto.Full plan) {

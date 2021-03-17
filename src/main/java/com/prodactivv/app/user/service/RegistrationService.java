@@ -3,6 +3,8 @@ package com.prodactivv.app.user.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prodactivv.app.admin.mails.MailNotificationService;
 import com.prodactivv.app.config.P24Defaults;
+import com.prodactivv.app.core.events.Event;
+import com.prodactivv.app.core.events.EventService;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.security.AuthService;
 import com.prodactivv.app.subscription.model.PromoCode;
@@ -16,6 +18,7 @@ import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedExcepti
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -38,8 +41,12 @@ public class RegistrationService {
     private final PromoCodeService promoCodeService;
     private final MailNotificationService mailService;
     private final SubscriptionPlanService subscriptionPlanService;
+    private final EventService eventService;
 
     private final P24Defaults p24Defaults;
+
+    @Value("${app.changePassword.url}")
+    private String changePasswordRequestUrl;
 
     public User.Dto.Simple signUp(User.Dto.UserRegistration userRegDto) throws UserRegistrationException, MandatoryRegulationsNotAcceptedException {
         User user = userRegDto.toUser();
@@ -130,6 +137,32 @@ public class RegistrationService {
     public PaymentRequest.Dto.Information getPaymentRequestInformation(String token) throws NotFoundException {
         PaymentRequest paymentRequest = paymentRequestRepository.findByToken(token).orElseThrow(new NotFoundException(String.format("Payment request %s not found", token)));
         return PaymentRequest.Dto.Information.fromPaymentRequest(paymentRequest);
+    }
+
+    public void sendChangePasswordMessage(String email) throws NotFoundException {
+        User user = userService.getUserByEmail(email);
+        Event passwordEvent = eventService.createUserBasedEvent(EventService.EventType.CHANGE_PASSWORD, user, LocalDate.now().plusDays(7L));
+        mailService.sendNotification(
+                email,
+                "Prośba zmiany hasła",
+                "Link resetowania hasła: " + changePasswordRequestUrl + passwordEvent.getCode());
+    }
+
+    public User.Dto.Simple applyPasswordChange(String eventHash, String newPassword) throws NotFoundException, NoSuchAlgorithmException {
+        Event eventByHash = eventService.getEventByHash(eventHash);
+        User user = eventByHash.getUser();
+        user.setPassword(newPassword);
+        user.hashPassword();
+
+        eventService.deleteEvent(eventByHash);
+
+        mailService.sendNotification(
+                user.getEmail(),
+                "Hasło zmienione",
+                "Twoje hasło zostało zmienione."
+        );
+
+        return User.Dto.Simple.fromUser(userRepository.save(user));
     }
 
     private void updateFinalPrice(PaymentRequest paymentRequest) {

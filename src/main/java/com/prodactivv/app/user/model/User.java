@@ -186,6 +186,34 @@ public class User {
         @Setter
         @Builder
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class UserInvitationData {
+            private Long id;
+            private String email;
+            private String name;
+            private String lastName;
+            private LocalDate birthday;
+            private String password;
+            private String sex;
+
+            public User toUser() throws NoSuchAlgorithmException {
+                User user = User.builder()
+                        .id(id)
+                        .email(email)
+                        .lastName(lastName)
+                        .name(name)
+                        .birthday(birthday)
+                        .password(password)
+                        .sex(sex)
+                        .build();
+                user.hashPassword();
+                return user;
+            }
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Subscriptions {
             private List<UserSubscription.Dto.FullUserLess> subscriptions;
             private Simple user;
@@ -213,12 +241,30 @@ public class User {
         @Builder
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class Diet {
+            private Long id;
             private Simple user;
             private DatabaseFile.Dto.Viewable diet;
 
             public static Diet fromUserDiet(UserDiet userDiet) {
                 return builder()
+                        .id(userDiet.getId())
                         .user(Simple.fromUser(userDiet.getUser()))
+                        .diet(DatabaseFile.Dto.Viewable.fromDatabaseFile(userDiet.getDietFile()))
+                        .build();
+            }
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class DietUserLess {
+            private Long id;
+            private DatabaseFile.Dto.Viewable diet;
+
+            public static DietUserLess fromUserDiet(UserDiet userDiet) {
+                return builder()
+                        .id(userDiet.getId())
                         .diet(DatabaseFile.Dto.Viewable.fromDatabaseFile(userDiet.getDietFile()))
                         .build();
             }
@@ -242,7 +288,7 @@ public class User {
             private Simple user;
             private List<UserSubscription.Dto.FullUserLess> subscriptions;
             private List<UsersWorkoutPlan.Dto.WorkoutPlanData> workoutPlans;
-            private List<Diet> diets;
+            private List<DietUserLess> diets;
 
             public boolean isSubscribedToPlanWithDiet() {
                 return subscriptions.stream().anyMatch(subscription -> subscription.getPlan().hasDietPlan());

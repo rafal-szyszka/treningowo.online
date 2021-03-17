@@ -2,8 +2,8 @@ package com.prodactivv.app.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prodactivv.app.admin.payments.model.PaymentRequest;
-import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
+import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
@@ -72,6 +73,24 @@ public class RegistrationController {
         try {
             return ResponseEntity.ok(service.getPaymentRequestInformation(token));
         } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/changePassword")
+    public void sendChangePasswordMessage(@RequestParam String email) {
+        try {
+            service.sendChangePasswordMessage(email);
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PostMapping(value = "/changePassword/{hash}")
+    public ResponseEntity<User.Dto.Simple> applyPasswordChange(@PathVariable String hash, @RequestBody HashMap<String, String> newPassword) {
+        try {
+            return ResponseEntity.ok(service.applyPasswordChange(hash, newPassword.get("pswd")));
+        } catch (NotFoundException | NoSuchAlgorithmException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
