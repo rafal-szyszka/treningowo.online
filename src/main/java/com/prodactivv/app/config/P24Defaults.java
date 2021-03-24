@@ -3,19 +3,29 @@ package com.prodactivv.app.config;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Component;
 
 @Getter
 @Component
-@PropertySource(value = "classpath:payments.properties")
+@PropertySources({
+        @PropertySource(value = "classpath:payments.properties"),
+})
 public class P24Defaults {
 
     @Value("${url.registerTransaction}")
     private String registerTransactionUrl;
+    @Value("${url.verifyTransaction}")
+    private String paymentVerificationUrl;
     @Value("${url.paymentMethods}")
     private String paymentMethodsUrl;
     @Value("${url.trnRequest}")
     private String trnRequestUrl;
+
+    @Value("${url.confirmPayment}")
+    private String confirmPaymentUrl;
+    @Value("${url.questionnaire}")
+    private String questionnaireUrl;
 
     @Value("${api.baseUrl}")
     private String baseUrl;

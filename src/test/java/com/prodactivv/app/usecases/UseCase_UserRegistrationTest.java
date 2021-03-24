@@ -45,7 +45,7 @@ public class UseCase_UserRegistrationTest {
 
             userDTO = registrationService.signUp(user);
 
-            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
             assertEquals("test@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException e) {
@@ -61,7 +61,7 @@ public class UseCase_UserRegistrationTest {
 
             userDTO = registrationService.signUp(user);
 
-            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
             assertEquals("test@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException e) {
@@ -77,7 +77,7 @@ public class UseCase_UserRegistrationTest {
 
             userDTO = registrationService.signUp(user);
 
-            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
             assertEquals("test@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException e) {
@@ -93,7 +93,7 @@ public class UseCase_UserRegistrationTest {
 
             userDTO = registrationService.signUp(user);
 
-            assertEquals(Long.valueOf(26), Long.valueOf(userDTO.getAge()));
+            assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
             assertEquals("test@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException | MandatoryRegulationsNotAcceptedException e) {

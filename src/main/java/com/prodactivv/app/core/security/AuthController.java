@@ -27,6 +27,15 @@ public class AuthController {
         }
     }
 
+    @GetMapping(value = "/public/auth/{shortToken}")
+    public ResponseEntity<TokenValidity.Dto.TokenResponse> restoreToken(@PathVariable String shortToken) {
+        try {
+            return ResponseEntity.ok(authService.restoreToken(shortToken));
+        } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
     @GetMapping(value = "/user/auth/info")
     public ResponseEntity<AuthResponse> getUserData(@RequestHeader(value = HttpHeaders.AUTHORIZATION) String token) {
         try {

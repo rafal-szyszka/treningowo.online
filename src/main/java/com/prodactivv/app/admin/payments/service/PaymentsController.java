@@ -9,7 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.MessagingException;
 import java.io.IOException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequiredArgsConstructor
@@ -19,7 +21,11 @@ public class PaymentsController {
 
     @PostMapping(value = "/public/payments/p24/verify")
     public void verifyTransaction(@RequestBody PaymentVerification verification) {
-        System.out.println(verification.toString());
+        try {
+            paymentsService.receiveNotificationAndVerifyPayment(verification);
+        } catch (IOException | NoSuchAlgorithmException | NotFoundException | MessagingException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @GetMapping(value = "/public/payments/p24/methods")

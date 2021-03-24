@@ -25,5 +25,20 @@ public class TokenValidity {
     @Column(length = 2048)
     public String token;
 
+    public String shortToken;
+
     private LocalDateTime until;
+
+    public static class Dto {
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class TokenResponse {
+            private String token;
+        }
+
+    }
+
 }

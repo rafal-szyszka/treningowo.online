@@ -27,6 +27,18 @@ public class PaymentRequest {
     public static final boolean PERSIST_TOKEN = true;
     public static final boolean OVERRIDE_TOKEN = false;
 
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public enum Scope {
+        REGISTRATION("reg"), PURCHASE("pur");
+
+        @Getter
+        private final String name;
+
+        public static boolean isRegistration(String scope) {
+            return scope.equalsIgnoreCase(REGISTRATION.name);
+        }
+    }
+
     @Id
     @GeneratedValue
     private Long id;
@@ -59,6 +71,8 @@ public class PaymentRequest {
 
     private Integer p24Method;
 
+    private String p24Status;
+
     private Integer finalPrice;
 
     private Boolean isVerified;
@@ -66,6 +80,8 @@ public class PaymentRequest {
     private Boolean isFinalized;
 
     private LocalDateTime datePlaced;
+
+    private String scope;
 
     @PrePersist
     public void setTokenAndDate() throws NoSuchAlgorithmException, JsonProcessingException {
@@ -146,6 +162,48 @@ public class PaymentRequest {
         @Setter
         @Builder
         @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class OrderControl {
+            private String sessionId;
+            private Integer orderId;
+            private Integer amount;
+            private String currency;
+            private String crc;
+
+            public static OrderControl fromPaymentRequest(PaymentRequest paymentRequest) {
+                return builder()
+                        .sessionId(paymentRequest.token)
+                        .orderId(paymentRequest.p24OrderId)
+                        .amount(paymentRequest.finalPrice)
+                        .currency(paymentRequest.getPlan().getCurrency())
+                        .crc(paymentRequest.p24Crc)
+                        .build();
+            }
+
+            public String calculateSign() throws NoSuchAlgorithmException, JsonProcessingException {
+                MessageDigest digest = MessageDigest.getInstance("SHA-384");
+                ObjectMapper objectMapper = new ObjectMapper();
+                return new String(
+                        Hex.encode(
+                                digest.digest(
+                                        objectMapper.writeValueAsString(
+                                                builder()
+                                                        .sessionId(sessionId)
+                                                        .orderId(orderId)
+                                                        .amount(amount)
+                                                        .currency(currency)
+                                                        .crc(crc)
+                                                        .build()
+                                        ).getBytes(StandardCharsets.UTF_8)
+                                )
+                        )
+                );
+            }
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
         public static class P24Object {
             private int merchantId;
             private int posId;
@@ -190,6 +248,32 @@ public class PaymentRequest {
                         .shipping(defaults.getShipping())
                         .sign(paymentRequest.getP24ControlSign())
                         .encoding(defaults.getEncoding())
+                        .build();
+            }
+        }
+
+        @Getter
+        @Setter
+        @Builder
+        @AllArgsConstructor(access = AccessLevel.PRIVATE)
+        public static class Verification {
+            private Integer merchantId;
+            private Integer posId;
+            private String sessionId;
+            private Integer amount;
+            private String currency;
+            private Integer orderId;
+            private String sign;
+
+            public static Verification fromPaymentRequest(PaymentRequest paymentRequest) {
+                return builder()
+                        .merchantId(paymentRequest.p24MerchantId)
+                        .posId(paymentRequest.p24MerchantId)
+                        .sessionId(paymentRequest.token)
+                        .amount(paymentRequest.finalPrice)
+                        .currency(paymentRequest.getPlan().getCurrency())
+                        .orderId(paymentRequest.p24OrderId)
+                        .sign(paymentRequest.p24ControlSign)
                         .build();
             }
         }

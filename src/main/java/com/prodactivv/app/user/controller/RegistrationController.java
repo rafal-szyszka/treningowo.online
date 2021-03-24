@@ -1,32 +1,31 @@
 package com.prodactivv.app.user.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.prodactivv.app.admin.mails.MailNotificationService;
 import com.prodactivv.app.admin.payments.model.PaymentRequest;
 import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.MessagingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Optional;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(value = "/public")
 public class RegistrationController {
 
     private final RegistrationService service;
-
-    @Autowired
-    public RegistrationController(RegistrationService service) {
-        this.service = service;
-    }
+    private final MailNotificationService mailService;
 
     @PostMapping(value = "/sign-up")
     public ResponseEntity<User.Dto.Simple> signUp(@RequestBody User.Dto.UserRegistration user) {
@@ -49,10 +48,10 @@ public class RegistrationController {
     }
 
     @PostMapping(value = "/sppRequest")
-    public ResponseEntity<String> sppRequest(@RequestParam Long userId, @RequestParam(required = false) Long planId, @RequestParam(required = false) String code) {
+    public ResponseEntity<String> sppRequest(@RequestParam Long userId, @RequestParam(required = false) Long planId, @RequestParam(required = false) String code, @RequestParam(required = false, name = "isReg") Boolean isRegistration) {
         try {
-            return ResponseEntity.ok(service.createSubRequestToken(userId, Optional.ofNullable(planId), Optional.ofNullable(code)));
-        } catch (NotFoundException e) {
+            return ResponseEntity.ok(service.createSubRequestToken(userId, Optional.ofNullable(planId), Optional.ofNullable(code), Optional.ofNullable(isRegistration)));
+        } catch (NotFoundException | MessagingException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
             );
@@ -93,6 +92,16 @@ public class RegistrationController {
         } catch (NotFoundException | NoSuchAlgorithmException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
+    }
+
+    @GetMapping(value = "/test")
+    public void test() throws MessagingException, NotFoundException {
+        mailService.sendNotificationHTML("rsonic94@gmail.com", "A", "<p>A</p>");
+
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("{redirect.url.purchaseConfirm}", "XD");
+
+        mailService.sendRegistrationEmail("rsonic94@gmail.com", variables);
     }
 
 }

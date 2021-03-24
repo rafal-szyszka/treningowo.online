@@ -5,6 +5,7 @@ import com.prodactivv.app.admin.survey.model.Questionnaire;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
+import com.prodactivv.app.core.exceptions.IllegalAccessException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
@@ -36,6 +37,7 @@ public class UserService {
     private final JwtUtils jwtUtils;
 
     private final UserRepository repository;
+    private final UserProgressRepository progressRepository;
     private final UserDietRepository dietRepository;
     private final SubscriptionPlanService subscriptionPlanService;
     private final UserSubscriptionService userSubscriptionService;
@@ -149,6 +151,57 @@ public class UserService {
         UserDiet userDiet = dietRepository.findById(dietId).orElseThrow(new NotFoundException(String.format("Diet %s not found!", dietId)));
         dietRepository.delete(userDiet);
         fileService.deleteFile(userDiet.getDietFile());
+    }
+
+    public UserProgress.Dto.ShowProgress addProgress(UserProgress.Dto.CreateProgress progress, String userId) throws NotFoundException {
+        UserProgress userProgress = UserProgress.builder()
+                .weight(progress.getWeight())
+                .arms(progress.getArms())
+                .biceps(progress.getBiceps())
+                .chest(progress.getChest())
+                .waist(progress.getWaist())
+                .hips(progress.getHips())
+                .thigh(progress.getThigh())
+                .date(progress.getDate() != null ? progress.getDate() : LocalDate.now())
+                .user(getUser(Long.parseLong(userId)))
+                .build();
+
+       return UserProgress.Dto.ShowProgress.fromUserProgress(progressRepository.save(userProgress));
+    }
+
+    public List<UserProgress.Dto.ShowProgress> getProgress(String userId) {
+        return progressRepository.getAllUserProgress(Long.parseLong(userId)).stream()
+                .map(UserProgress.Dto.ShowProgress::fromUserProgress)
+                .collect(Collectors.toList());
+    }
+
+    public UserProgress.Dto.ShowProgress deleteProgress(Long progressId, String userId) throws NotFoundException, IllegalAccessException {
+        UserProgress userProgress = progressRepository.findById(progressId).orElseThrow(new NotFoundException(String.format("Progress %s not found", progressId)));
+        if (userProgress.getUser().getId().equals(Long.parseLong(userId))) {
+            progressRepository.delete(userProgress);
+            return UserProgress.Dto.ShowProgress.fromUserProgress(userProgress);
+        }
+        throw new IllegalAccessException("Illegal access!");
+    }
+
+    public UserProgress.Dto.ShowProgress updateProgress(Long progressId, UserProgress.Dto.CreateProgress progress, String userId) throws NotFoundException, com.prodactivv.app.core.exceptions.IllegalAccessException {
+        UserProgress userProgress = progressRepository.findById(progressId).orElseThrow(new NotFoundException(String.format("Progress %s not found", progressId)));
+        if (userProgress.getUser().getId().equals(Long.parseLong(userId))) {
+            userProgress.setArms(progress.getArms());
+            userProgress.setBiceps(progress.getBiceps());
+            userProgress.setChest(progress.getChest());
+            userProgress.setHips(progress.getHips());
+            userProgress.setThigh(progress.getThigh());
+            userProgress.setWaist(progress.getWaist());
+            userProgress.setWeight(progress.getWeight());
+            if (progress.getDate() != null) {
+                userProgress.setDate(progress.getDate());
+            }
+
+            return UserProgress.Dto.ShowProgress.fromUserProgress(progressRepository.save(userProgress));
+        }
+
+        throw new IllegalAccessException("Illegal access!");
     }
 
     private Optional<Pair<Long, String>> toIdNameQuestionnaire(SubscriptionPlan.Dto.Full plan) {

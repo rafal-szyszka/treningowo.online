@@ -21,7 +21,7 @@ public class EventService {
     private final EventRepository eventRepository;
 
     public enum EventType {
-        CHANGE_PASSWORD("change_password");
+        CHANGE_PASSWORD("change_password"), FILL_QUESTIONNAIRE("fill_questionnaire");
 
         @Getter
         private final String type;
@@ -43,6 +43,17 @@ public class EventService {
                         .type(eventType.type)
                         .code(hashGenerator.generateSha384Hash(hashParts))
                         .validUntil(validUntil)
+                        .build()
+        );
+    }
+
+    public Event createUserBasedEvent(EventType eventType, User user, String code) {
+        return eventRepository.save(
+                Event.builder()
+                        .user(user)
+                        .type(eventType.type)
+                        .code(code)
+                        .validUntil(LocalDate.now().plusDays(14))
                         .build()
         );
     }

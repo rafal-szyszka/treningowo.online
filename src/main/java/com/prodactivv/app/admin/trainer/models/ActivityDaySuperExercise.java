@@ -49,6 +49,8 @@ public class ActivityDaySuperExercise {
         private String name;
         private String videoUrl;
         private String description;
+        private String workoutPlanPart;
+        private String indexName;
 
         @JsonIgnore
         private DetailedExerciseManagerDTO detailedExerciseManagerDTO;
@@ -71,6 +73,8 @@ public class ActivityDaySuperExercise {
                     detailedExerciseManagerDTO.name,
                     detailedExerciseManagerDTO.videoUrl,
                     detailedExerciseManagerDTO.description,
+                    detailedExerciseManagerDTO.workoutPlanPart,
+                    detailedExerciseManagerDTO.indexName,
                     detailedExerciseManagerDTO
             );
         }

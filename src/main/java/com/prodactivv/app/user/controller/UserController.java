@@ -1,12 +1,14 @@
 package com.prodactivv.app.user.controller;
 
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
+import com.prodactivv.app.core.exceptions.IllegalAccessException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
 import com.prodactivv.app.core.files.UnsupportedStorageTypeException;
 import com.prodactivv.app.core.security.JwtUtils;
 import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserProgress;
 import com.prodactivv.app.user.model.UserSubscription;
 import com.prodactivv.app.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -103,6 +105,42 @@ public class UserController {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
             );
+        }
+    }
+
+    @GetMapping(value = "/user/progress")
+    public ResponseEntity<List<UserProgress.Dto.ShowProgress>> getUserProgress(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            return ResponseEntity.ok(userService.getProgress(jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID)));
+        } catch (DisintegratedJwsException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PostMapping(value = "/user/progress")
+    public ResponseEntity<UserProgress.Dto.ShowProgress> addProgress(@RequestBody UserProgress.Dto.CreateProgress progress, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            return ResponseEntity.ok(userService.addProgress(progress, jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID)));
+        } catch (DisintegratedJwsException | NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/user/progress/{id}")
+    public ResponseEntity<UserProgress.Dto.ShowProgress> updateProgress(@PathVariable Long id, @RequestBody UserProgress.Dto.CreateProgress progress, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            return ResponseEntity.ok(userService.updateProgress(id, progress, jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID)));
+        } catch (DisintegratedJwsException | NotFoundException | IllegalAccessException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @DeleteMapping(value = "/user/progress/{id}")
+    public ResponseEntity<UserProgress.Dto.ShowProgress> deleteProgress(@PathVariable Long id, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        try {
+            return ResponseEntity.ok(userService.deleteProgress(id, jwtUtils.obtainClaimWithIntegrityCheck(token, JwtUtils.CLAIM_ID)));
+        } catch (DisintegratedJwsException | NotFoundException | IllegalAccessException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
 }

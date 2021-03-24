@@ -32,8 +32,12 @@ public class DetailedExercise {
 
     private String time;
 
-    @Column(length = 20000)
+    @Column(columnDefinition = "TEXT", length = 10000)
     private String tips;
+
+    private String workoutPlanPart;
+
+    private String indexName;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exercise_id")
@@ -62,6 +66,8 @@ public class DetailedExercise {
         this.pace = detailedExerciseDTO.getPace();
         this.time = detailedExerciseDTO.getTime();
         this.tips = detailedExerciseDTO.getTips();
+        this.workoutPlanPart = detailedExerciseDTO.getWorkoutPlanPart();
+        this.indexName = detailedExerciseDTO.getIndexName();
         this.exercise = exercise;
     }
 
@@ -74,6 +80,8 @@ public class DetailedExercise {
         this.pace = detailedExerciseDTO.pace;
         this.time = detailedExerciseDTO.time;
         this.tips = detailedExerciseDTO.tips;
+        this.workoutPlanPart = detailedExerciseDTO.workoutPlanPart;
+        this.indexName = detailedExerciseDTO.indexName;
     }
 
     @Setter
@@ -93,6 +101,8 @@ public class DetailedExercise {
         protected String time;
         protected String tips;
         protected Long exerciseId;
+        protected String workoutPlanPart;
+        protected String indexName;
 
         public static DetailedExerciseDTO of(DetailedExercise detailedExercise) {
             return new DetailedExerciseDTO(
@@ -105,7 +115,9 @@ public class DetailedExercise {
                     detailedExercise.pace,
                     detailedExercise.time,
                     detailedExercise.tips,
-                    detailedExercise.exercise.getId()
+                    detailedExercise.exercise.getId(),
+                    detailedExercise.workoutPlanPart,
+                    detailedExercise.indexName
             );
         }
     }
@@ -137,6 +149,8 @@ public class DetailedExercise {
             simpleDTO.rir = detailedExercise.rir;
             simpleDTO.restBetweenSets = detailedExercise.restBetweenSets;
             simpleDTO.exerciseId = detailedExercise.exercise.getId();
+            simpleDTO.workoutPlanPart = detailedExercise.workoutPlanPart;
+            simpleDTO.indexName = detailedExercise.indexName;
 
             return simpleDTO;
         }

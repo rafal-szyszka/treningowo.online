@@ -2,6 +2,8 @@ package com.prodactivv.app.core.security;
 
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO.SimpleWorkoutPlanView;
 import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
+import com.prodactivv.app.core.events.Event;
+import com.prodactivv.app.core.events.EventService;
 import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.InvalidCredentialsException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
@@ -36,6 +38,7 @@ public class AuthService {
     private final UserSubscriptionService subscriptionService;
     private final UsersWorkoutPlanService workoutPlanService;
     private final UserDietRepository dietRepository;
+    private final EventService eventService;
 
     @Value("${app.security.access.control.user-level.url.prefix}")
     private String accessControlUserLevelUrlPrefix;
@@ -56,6 +59,13 @@ public class AuthService {
         }
 
         throw new InvalidCredentialsException();
+    }
+
+    public TokenValidity.Dto.TokenResponse restoreToken(String shortToken) throws NotFoundException {
+        Event event = eventService.getEventByHash(shortToken);
+        User user = event.getUser();
+        TokenValidity tokenValidity = tokenValidityService.createTokenValidityForUser(user);
+        return TokenValidity.Dto.TokenResponse.builder().token(tokenValidity.token).build();
     }
 
     public AuthResponse getTokenData(String token) throws NotFoundException, DisintegratedJwsException, UserNotFoundException {

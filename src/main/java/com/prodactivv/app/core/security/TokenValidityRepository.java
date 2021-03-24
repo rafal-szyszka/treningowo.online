@@ -14,4 +14,5 @@ public interface TokenValidityRepository extends JpaRepository<TokenValidity, Lo
 
     Optional<TokenValidity> findByToken(String token);
 
+    Optional<TokenValidity> findTokenValidityByShortToken(String shortToken);
 }

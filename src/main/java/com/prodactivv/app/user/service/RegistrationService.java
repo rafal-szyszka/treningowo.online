@@ -2,31 +2,32 @@ package com.prodactivv.app.user.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.prodactivv.app.admin.mails.MailNotificationService;
+import com.prodactivv.app.admin.payments.model.PaymentRequest;
+import com.prodactivv.app.admin.payments.model.PaymentRequest.PaymentRequestBuilder;
+import com.prodactivv.app.admin.payments.model.PaymentRequestRepository;
 import com.prodactivv.app.config.P24Defaults;
 import com.prodactivv.app.core.events.Event;
 import com.prodactivv.app.core.events.EventService;
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.security.AuthService;
 import com.prodactivv.app.subscription.model.PromoCode;
 import com.prodactivv.app.subscription.model.SubscriptionPlan;
 import com.prodactivv.app.subscription.service.PromoCodeService;
 import com.prodactivv.app.subscription.service.SubscriptionPlanService;
-import com.prodactivv.app.admin.payments.model.PaymentRequest;
-import com.prodactivv.app.admin.payments.model.PaymentRequest.PaymentRequestBuilder;
-import com.prodactivv.app.admin.payments.model.PaymentRequestRepository;
-import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.Optional;
 
 @Service
@@ -72,7 +73,7 @@ public class RegistrationService {
         throw new MandatoryRegulationsNotAcceptedException();
     }
 
-    public String createSubRequestToken(Long userId, Optional<Long> planId, Optional<String> codeId) throws NotFoundException {
+    public String createSubRequestToken(Long userId, Optional<Long> planId, Optional<String> codeId, Optional<Boolean> isRegistration) throws NotFoundException, MessagingException {
         User user = userRepository.findById(userId).orElseThrow(new NotFoundException(String.format("User %s not found", userId)));
 
         PaymentRequestBuilder paymentRequestBuilder = PaymentRequest.builder()
@@ -81,6 +82,12 @@ public class RegistrationService {
                 .p24Crc(p24Defaults.getCrc())
                 .isVerified(false)
                 .isFinalized(false);
+
+        if (isRegistration.isPresent() && isRegistration.get()) {
+            paymentRequestBuilder.scope(PaymentRequest.Scope.REGISTRATION.getName());
+        } else {
+            paymentRequestBuilder.scope(PaymentRequest.Scope.PURCHASE.getName());
+        }
 
         if (planId.isPresent()) {
             SubscriptionPlan plan = subscriptionPlanService.getSubscriptionPlanById(planId.get());
@@ -97,11 +104,13 @@ public class RegistrationService {
         updateFinalPrice(paymentRequest);
 
         paymentRequest = paymentRequestRepository.save(paymentRequest);
-        mailService.sendNotification(
-                user.getEmail(),
-                "Witaj",
-                String.format("Twój kod do rejestracji wygasa %s. Kod: %s", paymentRequest.getValidUntil().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")), paymentRequest.getToken())
-        );
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("{redirect.url}", p24Defaults.getConfirmPaymentUrl() + paymentRequest.getToken());
+        if (PaymentRequest.Scope.isRegistration(paymentRequest.getScope())) {
+            mailService.sendRegistrationEmail(paymentRequest.getUser().getEmail(), variables);
+        } else {
+            mailService.sendPurchaseEmail(paymentRequest.getUser().getEmail(), variables);
+        }
 
         return paymentRequest.getToken();
     }
