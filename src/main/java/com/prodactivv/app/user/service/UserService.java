@@ -9,6 +9,7 @@ import com.prodactivv.app.core.exceptions.IllegalAccessException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
 import com.prodactivv.app.core.exceptions.UserNotFoundException;
+import com.prodactivv.app.core.files.DatabaseFile;
 import com.prodactivv.app.core.files.DatabaseFileService;
 import com.prodactivv.app.core.files.UnsupportedStorageTypeException;
 import com.prodactivv.app.core.security.JwtUtils;
@@ -202,6 +203,13 @@ public class UserService {
         }
 
         throw new IllegalAccessException("Illegal access!");
+    }
+
+    public User.Dto.Simple setAvatar(Long userId, MultipartFile avatar) throws IOException, NotFoundException {
+        DatabaseFile avatarFile = fileService.uploadFileToLocalStorage(avatar);
+        User user = getUser(userId);
+        user.setAvatar(avatarFile);
+        return User.Dto.Simple.fromUser(repository.save(user));
     }
 
     private Optional<Pair<Long, String>> toIdNameQuestionnaire(SubscriptionPlan.Dto.Full plan) {

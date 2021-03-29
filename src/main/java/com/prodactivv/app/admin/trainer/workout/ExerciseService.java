@@ -83,4 +83,8 @@ public class ExerciseService {
 
         return detailedExerciseRepository.save(detailedExercise);
     }
+
+    public DetailedExercise saveExercise(DetailedExercise detailedExercise) {
+        return detailedExerciseRepository.save(detailedExercise);
+    }
 }

@@ -81,4 +81,12 @@ public class WorkoutPlanService {
     public ActivityDaySuperExerciseManagerDto moveExerciseByStep(Long id, Long step) throws NotFoundException {
         return activityService.moveExerciseByStep(id, step);
     }
+
+    public ActivityWeekManagerDTO copyWeek(Long sourceId, Long targetId) throws NotFoundException, ExerciseNotFoundException {
+        return activityService.overrideTargetWeekActivityDaysWithCopyOfSources(sourceId, targetId);
+    }
+
+    public ActivityDayManagerDTO copyDay(Long sourceId, Long targetId) throws NotFoundException, ExerciseNotFoundException {
+        return activityService.overrideTargetActivityDayExercisesWithCopyOfSources(sourceId, targetId);
+    }
 }

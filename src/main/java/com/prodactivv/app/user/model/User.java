@@ -48,6 +48,10 @@ public class User {
 
     private String role;
 
+    @ManyToOne
+    @JoinColumn(name = "avatar_file_id")
+    private DatabaseFile avatar;
+
     private Boolean acceptedTermsOfUse;
 
     private Boolean acceptedPrivacyPolicy;
@@ -111,6 +115,7 @@ public class User {
             private String sex;
             private String role;
             private String token;
+            private DatabaseFile.Dto.Viewable avatar;
 
             public static Simple fromUser(User user) {
                 return builder()
@@ -123,6 +128,7 @@ public class User {
                         .signedUpDate(user.getSignedUpDate())
                         .sex(user.getSex())
                         .role(user.getRole())
+                        .avatar(user.avatar != null ? DatabaseFile.Dto.Viewable.fromDatabaseFile(user.avatar) : null)
                         .build();
             }
 

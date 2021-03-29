@@ -62,6 +62,10 @@ public class ActivityWeek implements Comparable<ActivityWeek> {
         return id.compareTo(o.id);
     }
 
+    public void clearDays() {
+        activityDays = new HashSet<>();
+    }
+
     @Setter
     @Getter
     @NoArgsConstructor

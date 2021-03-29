@@ -143,4 +143,16 @@ public class UserController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
+    @PutMapping(value = "/user/setAvatar")
+    public ResponseEntity<User.Dto.Simple> setAvatar(@RequestHeader(HttpHeaders.AUTHORIZATION) String jws, MultipartFile avatarFile) {
+        try {
+            return ResponseEntity.ok(userService.setAvatar(
+                    Long.valueOf(jwtUtils.obtainClaimWithIntegrityCheck(jws, JwtUtils.CLAIM_ID)),
+                    avatarFile
+            ));
+        } catch (IOException | NotFoundException | DisintegratedJwsException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

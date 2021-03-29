@@ -51,6 +51,22 @@ public class DetailedExercise {
     @JsonIgnore
     private Set<ActivityDaySuperExercise> superDays;
 
+    public DetailedExercise copy() {
+        return builder()
+                .setCount(this.setCount)
+                .perSetCount(this.perSetCount)
+                .restBetweenSets(this.restBetweenSets)
+                .weight(this.weight)
+                .rir(this.rir)
+                .pace(this.pace)
+                .time(this.time)
+                .tips(this.tips)
+                .workoutPlanPart(this.workoutPlanPart)
+                .indexName(this.indexName)
+                .exercise(this.exercise)
+                .build();
+    }
+
     public void deleteActivityDaySuperExercise(ActivityDaySuperExercise superExercise) {
         if (superDays != null) {
             superDays.remove(superExercise);

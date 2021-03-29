@@ -1,6 +1,7 @@
 package com.prodactivv.app.newsletter;
 
 import com.prodactivv.app.admin.mails.MailNotificationService;
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,8 +17,12 @@ public class PublicController {
 
 
     @PostMapping(value = "/public/newsletter/subscribe")
-    public void subscribeToNewsletter(@RequestParam String email) {
-        newsletterService.subscribe(email);
+    public void subscribeToNewsletter(@RequestBody Newsletter.Dto.Subscription subscription) {
+        try {
+            newsletterService.subscribe(subscription);
+        } catch (MandatoryRegulationsNotAcceptedException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
     }
 
     @PutMapping(value = "/public/newsletter/unsubscribe/{code}")

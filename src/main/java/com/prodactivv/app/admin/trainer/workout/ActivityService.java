@@ -14,9 +14,7 @@ import com.prodactivv.app.core.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.prodactivv.app.admin.trainer.models.ActivityDay.ActivityDayDTO;
@@ -46,6 +44,7 @@ public class ActivityService {
 
             activityDay.setName(activityDayDTO.getName());
             activityDay.setTips(activityDayDTO.getTips());
+            activityDay.setOrder(activityDayDTO.getOrder());
 
             if (activityDayDTO.getWorkouts() != null) {
                 for (WorkoutDTO workoutDTO : activityDayDTO.getWorkouts()) {
@@ -64,6 +63,7 @@ public class ActivityService {
 
             activityDay.setName(activityDayDTO.getName());
             activityDay.setTips(activityDayDTO.getTips());
+            activityDay.setOrder(activityDayDTO.getOrder());
 
             activityDay = repository.save(activityDay);
 
@@ -210,5 +210,87 @@ public class ActivityService {
         }
 
         return ActivityDaySuperExerciseManagerDto.of(superExercise);
+    }
+
+    public ActivityWeekManagerDTO overrideTargetWeekActivityDaysWithCopyOfSources(Long sourceId, Long targetId) throws NotFoundException, ExerciseNotFoundException {
+        ActivityWeek sourceWeek = activityWeekRepository.findById(sourceId).orElseThrow(new NotFoundException(String.format("Activity week %s not found", sourceId)));
+        ActivityWeek targetWeek = activityWeekRepository.findById(targetId).orElseThrow(new NotFoundException(String.format("Activity week %s not found", targetId)));
+
+        List<Long> activityDayIds = targetWeek.getActivityDays().stream().map(ActivityDay::getId).collect(Collectors.toList());
+        for (Long activityDayId : activityDayIds) {
+            deleteActivityDayById(activityDayId);
+        }
+        targetWeek.clearDays();
+        activityWeekRepository.save(targetWeek);
+
+        targetWeek.setActivityDays(sourceWeek.getActivityDays().stream().sorted()
+                .map(this::copyActivityDay)
+                .collect(Collectors.toSet()));
+
+        activityWeekRepository.save(targetWeek);
+
+        return ActivityWeekManagerDTO.of(targetWeek).orElseThrow(new NotFoundException("Copy failed!"));
+    }
+
+    public ActivityDayManagerDTO overrideTargetActivityDayExercisesWithCopyOfSources(Long sourceId, Long targetId) throws NotFoundException, ExerciseNotFoundException {
+        ActivityDay sourceDay = repository.findById(sourceId).orElseThrow(new NotFoundException(String.format("Activity day %s not found", sourceId)));
+        ActivityDay targetDay = repository.findById(targetId).orElseThrow(new NotFoundException(String.format("Activity day %s not found", targetId)));
+
+        String targetDayOriginalName = targetDay.getName();
+        Long targetDayOriginalOrder = targetDay.getOrder();
+
+        Set<ActivityWeek> targetDayWeeks = targetDay.getActivityWeeks();
+        for (ActivityWeek targetDayWeek : targetDayWeeks) {
+            targetDayWeek.removeDay(targetDay);
+        }
+
+        deleteActivityDayById(targetId);
+        targetDay = copyActivityDay(sourceDay);
+        targetDay.setName(targetDayOriginalName);
+        targetDay.setOrder(targetDayOriginalOrder);
+        for (ActivityWeek targetDayWeek : targetDayWeeks) {
+            targetDayWeek.addDay(targetDay);
+        }
+        activityWeekRepository.saveAll(targetDayWeeks);
+
+        return ActivityDayManagerDTO.of(targetDay);
+    }
+
+    private ActivityWeek copyActivityWeek(ActivityWeek activityWeek) {
+        ActivityWeek newActivityWeek = ActivityWeek.builder().name(activityWeek.getName()).build();
+        newActivityWeek.setActivityDays(activityWeek.getActivityDays().stream().sorted()
+                .map(this::copyActivityDay)
+                .collect(Collectors.toSet()));
+
+        return activityWeekRepository.save(newActivityWeek);
+    }
+
+    private ActivityDay copyActivityDay(ActivityDay day) {
+        ActivityDay newDay = ActivityDay.builder().name(day.getName()).tips(day.getTips()).order(day.getOrder()).build();
+        List<ActivityDaySuperExercise> newExercises = day.getSuperExercises().stream()
+                .map(ActivityDaySuperExercise::copy)
+                .collect(Collectors.toList());
+
+        newDay = repository.save(newDay);
+
+        for (ActivityDaySuperExercise exercise : newExercises) {
+            exercise.setDetailedExercise(exerciseService.saveExercise(exercise.getDetailedExercise()));
+            exercise.setActivityDay(newDay);
+            exercise = superExerciseRepository.save(exercise);
+            newDay.addDetailedExercise(exercise);
+            newDay.getSuperExercises().sort(Comparator.comparing(ActivityDaySuperExercise::getExerciseOrder));
+        }
+
+        return newDay;
+    }
+
+    public void deleteActivityDayById(Long id) throws NotFoundException, ExerciseNotFoundException {
+        ActivityDay activityDay = repository.findById(id).orElseThrow(new NotFoundException(String.format("Activity day %s not found", id)));
+        List<Long> exerciseIds = activityDay.getSuperExercises().stream().map(ActivityDaySuperExercise::getId).collect(Collectors.toList());
+        for (Long exerciseId : exerciseIds) {
+            exerciseService.deleteDetailedExercise(exerciseId);
+        }
+        activityDay.setActivityWeeks(new HashSet<>());
+        repository.delete(activityDay);
     }
 }

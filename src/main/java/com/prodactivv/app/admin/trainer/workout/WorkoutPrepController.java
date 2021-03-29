@@ -217,4 +217,22 @@ public class WorkoutPrepController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
+
+    @PutMapping(value = "/manage/plan/copy-week/{sourceId}/to/{targetId}")
+    public ResponseEntity<ActivityWeekManagerDTO> copyWeek(@PathVariable Long sourceId, @PathVariable Long targetId) {
+        try {
+            return ResponseEntity.ok(workoutPlanService.copyWeek(sourceId, targetId));
+        } catch (NotFoundException | ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/manage/plan/copy-day/{sourceId}/to/{targetId}")
+    public ResponseEntity<ActivityDayManagerDTO> copyDay(@PathVariable Long sourceId, @PathVariable Long targetId) {
+        try {
+            return ResponseEntity.ok(workoutPlanService.copyDay(sourceId, targetId));
+        } catch (NotFoundException | ExerciseNotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
 }

@@ -22,6 +22,9 @@ public class ActivityDay implements Comparable<ActivityDay> {
     @GeneratedValue
     private Long id;
 
+    @Column(name = "order_index")
+    private Long order;
+
     private String name;
 
     @Column(columnDefinition = "TEXT", length = 10000)
@@ -76,7 +79,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
 
     @Override
     public int compareTo(ActivityDay o) {
-        return id.compareTo(o.id);
+        return order.compareTo(o.order);
     }
 
     @Setter
@@ -87,12 +90,14 @@ public class ActivityDay implements Comparable<ActivityDay> {
 
         private String name;
         private String tips;
+        private Long order;
         private List<WorkoutDTO> workouts;
 
         public static ActivityDayDTO getEmpty(String dayName) {
             return new ActivityDayDTO(
                     dayName,
                     "",
+                    1L,
                     Collections.emptyList()
             );
         }
@@ -107,6 +112,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
         private Long id;
         private String name;
         private String tips;
+        private Long order;
         private List<ActivityDaySuperExerciseManagerDto> exercises;
 
         public static ActivityDayManagerDTO getEmpty(String name) {
@@ -114,6 +120,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
                     null,
                     name,
                     "",
+                    1L,
                     Collections.emptyList()
             );
         }
@@ -123,6 +130,7 @@ public class ActivityDay implements Comparable<ActivityDay> {
                     activityDay.id,
                     activityDay.name,
                     activityDay.tips,
+                    activityDay.order,
                     getExercises(activityDay)
             );
         }

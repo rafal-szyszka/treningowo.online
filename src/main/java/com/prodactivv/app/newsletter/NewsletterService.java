@@ -1,6 +1,7 @@
 package com.prodactivv.app.newsletter;
 
 import com.prodactivv.app.admin.mails.MailNotificationService;
+import com.prodactivv.app.core.exceptions.MandatoryRegulationsNotAcceptedException;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.utils.HashGenerator;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +20,25 @@ public class NewsletterService {
     private final MailNotificationService notificationService;
     private final NewsletterRepository newsletterRepository;
 
-    public void subscribe(String email) {
+    public void subscribe(Newsletter.Dto.Subscription subscription) throws MandatoryRegulationsNotAcceptedException {
         LocalDate now = LocalDate.now();
-        String code = hashGenerator.generateSha384Hash(Arrays.asList(now.format(DateTimeFormatter.ISO_LOCAL_DATE), email));
-        newsletterRepository.save(
-                Newsletter.builder()
-                        .email(email)
-                        .signUpDate(now)
-                        .code(code)
-                        .build()
-        );
+        String code = hashGenerator.generateSha384Hash(Arrays.asList(now.format(DateTimeFormatter.ISO_LOCAL_DATE), subscription.getEmail()));
+        if (subscription.areNecessaryRegulationsAccepted()) {
+            newsletterRepository.save(
+                    Newsletter.builder()
+                            .email(subscription.getEmail())
+                            .allowedMarketingMessages(subscription.isAllowedMarketingMessages())
+                            .isPrivacyPolicyAccepted(subscription.isPrivacyPolicyAccepted())
+                            .isTermsOfUseAccepted(subscription.isTermsOfUseAccepted())
+                            .signUpDate(now)
+                            .code(code)
+                            .build()
+            );
 
-        notificationService.sendSubscribedToNewsletter(email, new HashMap<>());
+            notificationService.sendSubscribedToNewsletter(subscription.getEmail(), new HashMap<>());
+        } else {
+            throw new MandatoryRegulationsNotAcceptedException("Mandatory regulations were not accepted!");
+        }
     }
 
     public void unsubscribe(String code) throws NotFoundException {

@@ -28,6 +28,13 @@ public class ActivityDaySuperExercise {
 
     private Long exerciseOrder;
 
+    public ActivityDaySuperExercise copy() {
+        return builder()
+                .exerciseOrder(this.getExerciseOrder())
+                .detailedExercise(this.detailedExercise.copy())
+                .build();
+    }
+
     @Getter
     @Setter
     @NoArgsConstructor
