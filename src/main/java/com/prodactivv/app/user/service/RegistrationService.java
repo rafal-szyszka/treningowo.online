@@ -60,6 +60,7 @@ public class RegistrationService {
                     user.setRole(User.Roles.USER.getRoleName());
                     User.Dto.Simple userDto = User.Dto.Simple.fromUser(userRepository.save(user));
                     userDto.setToken(authService.generateTokenForUser(user).getToken());
+                    mailService.sendWelcomeMessage(user.getEmail(), new HashMap<>());
                     return userDto;
                 } else {
                     throw new UserRegistrationException("Email is already taken");
@@ -73,21 +74,16 @@ public class RegistrationService {
         throw new MandatoryRegulationsNotAcceptedException();
     }
 
-    public String createSubRequestToken(Long userId, Optional<Long> planId, Optional<String> codeId, Optional<Boolean> isRegistration) throws NotFoundException, MessagingException {
+    public String createSubRequestToken(Long userId, Optional<Long> planId, Optional<String> codeId) throws NotFoundException, MessagingException {
         User user = userRepository.findById(userId).orElseThrow(new NotFoundException(String.format("User %s not found", userId)));
 
         PaymentRequestBuilder paymentRequestBuilder = PaymentRequest.builder()
                 .user(user)
                 .p24MerchantId(p24Defaults.getMerchantId())
                 .p24Crc(p24Defaults.getCrc())
+                .scope(PaymentRequest.Scope.PURCHASE.getName())
                 .isVerified(false)
                 .isFinalized(false);
-
-        if (isRegistration.isPresent() && isRegistration.get()) {
-            paymentRequestBuilder.scope(PaymentRequest.Scope.REGISTRATION.getName());
-        } else {
-            paymentRequestBuilder.scope(PaymentRequest.Scope.PURCHASE.getName());
-        }
 
         if (planId.isPresent()) {
             SubscriptionPlan plan = subscriptionPlanService.getSubscriptionPlanById(planId.get());
@@ -106,11 +102,7 @@ public class RegistrationService {
         paymentRequest = paymentRequestRepository.save(paymentRequest);
         HashMap<String, String> variables = new HashMap<>();
         variables.put("{redirect.url}", p24Defaults.getConfirmPaymentUrl() + paymentRequest.getToken());
-        if (PaymentRequest.Scope.isRegistration(paymentRequest.getScope())) {
-            mailService.sendRegistrationEmail(paymentRequest.getUser().getEmail(), variables);
-        } else {
-            mailService.sendPurchaseEmail(paymentRequest.getUser().getEmail(), variables);
-        }
+        mailService.sendPurchaseEmail(paymentRequest.getUser().getEmail(), variables);
 
         return paymentRequest.getToken();
     }

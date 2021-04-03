@@ -8,6 +8,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.MessagingException;
+import java.util.HashMap;
+
 @RestController
 @RequiredArgsConstructor
 public class PublicController {
@@ -37,5 +40,12 @@ public class PublicController {
     @PostMapping(value = "/public/contact")
     public void contact(@RequestBody ContactData contactData) {
         notificationService.sendContactNotification(contactData);
+    }
+
+    @GetMapping("/public/test/{email}")
+    public void test(@PathVariable String email) throws NotFoundException, MessagingException {
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("{redirect.url}", "https://treningowo.online");
+        notificationService.sendPurchaseConfirmationEmail(email, variables);
     }
 }

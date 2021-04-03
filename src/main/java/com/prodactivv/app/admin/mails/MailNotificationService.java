@@ -75,6 +75,14 @@ public class MailNotificationService {
 //        sendSystemNotificationHTMLMail(email, variables, "mail.newsletter.unsubscribed");
     }
 
+    public void sendPlanReadyNotification(String email, HashMap<String, String> variables) throws NotFoundException, MessagingException {
+        sendSystemNotificationHTMLMail(email, variables, "mail.user.workoutPlan.ready");
+    }
+
+    public void sendWelcomeMessage(String email, HashMap<String, String> variables) throws NotFoundException, MessagingException {
+        sendSystemNotificationHTMLMail(email, variables, "mail.user.welcome");
+    }
+
     private void sendSystemNotificationHTMLMail(String email, HashMap<String, String> variables, String notificationUid) throws NotFoundException, MessagingException {
         Notification notification = notificationRepository.findNotificationByTextUid(notificationUid)
                 .orElseThrow(new NotFoundException(String.format("Notification %s not found!", notificationUid)));

@@ -48,9 +48,9 @@ public class RegistrationController {
     }
 
     @PostMapping(value = "/sppRequest")
-    public ResponseEntity<String> sppRequest(@RequestParam Long userId, @RequestParam(required = false) Long planId, @RequestParam(required = false) String code, @RequestParam(required = false, name = "isReg") Boolean isRegistration) {
+    public ResponseEntity<String> sppRequest(@RequestParam Long userId, @RequestParam(required = false) Long planId, @RequestParam(required = false) String code) {
         try {
-            return ResponseEntity.ok(service.createSubRequestToken(userId, Optional.ofNullable(planId), Optional.ofNullable(code), Optional.ofNullable(isRegistration)));
+            return ResponseEntity.ok(service.createSubRequestToken(userId, Optional.ofNullable(planId), Optional.ofNullable(code)));
         } catch (NotFoundException | MessagingException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
