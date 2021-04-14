@@ -3,6 +3,7 @@ package com.prodactivv.app.core.files;
 import com.prodactivv.app.config.DatabaseFiles;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
+import com.prodactivv.app.core.utils.HashGenerator;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ public class DatabaseFileService {
 
     private final DatabaseFileRepository databaseFileRepository;
     private final DatabaseFiles databaseFiles;
+    private final HashGenerator hashGenerator;
 
     public InputStream downloadFile(Long id) throws NotFoundException, UnreachableFileStorageTypeException, FileNotFoundException {
         DatabaseFile file = databaseFileRepository.findById(id).orElseThrow(new NotFoundException(String.format("File %s not found", id)));
@@ -91,10 +93,16 @@ public class DatabaseFileService {
 
     private DatabaseFile uploadFileLocal(MultipartFile file, StorageType type, String filePath) throws IOException {
         String fileName;
-        if (file.getOriginalFilename() != null) {
-            fileName = file.getOriginalFilename().replaceAll("[\\s\\/\\\\\\|]", "");
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        String hash = "_" + hashGenerator.generateRandom(5);
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename != null) {
+            int lastDot = originalFilename.lastIndexOf(".");
+            String ext = originalFilename.substring(lastDot);
+            fileName = originalFilename.substring(0, lastDot);
+            fileName = fileName.replaceAll("[\\s\\/\\\\\\|]", "") + timestamp + hash + ext;
         } else {
-            fileName = "file_" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+            fileName = "file_" + timestamp + hash;
         }
 
         Path path = Paths.get(filePath + fileName);

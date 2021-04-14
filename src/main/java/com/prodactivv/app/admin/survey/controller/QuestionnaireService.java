@@ -4,6 +4,7 @@ import com.prodactivv.app.admin.survey.model.*;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.files.DatabaseFile;
 import com.prodactivv.app.core.files.DatabaseFileService;
+import com.prodactivv.app.core.files.UnsupportedStorageTypeException;
 import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.model.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,10 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.QuestionnaireResultDto;
@@ -51,6 +55,25 @@ public class QuestionnaireService {
         return repository.save(questionnaire);
     }
 
+    public Questionnaire addImageQuestion(Long questionnaireId, MultipartFile image, String typeName) throws NotFoundException, IOException {
+        Questionnaire questionnaire = getQuestionnaire(questionnaireId);
+        Question imageQuestion = questionRepository.save(
+                Question.builder()
+                        .image(fileService.uploadFileToLocalStorage(image))
+                        .questionOrder(questionnaire.getQuestions().size() + 1L)
+                        .questionnaire(questionnaire)
+                        .title(image.getOriginalFilename() != null ? image.getOriginalFilename() : "IMAGE")
+                        .options("[]")
+                        .mandatory(0L)
+                        .type(typeName)
+                        .build()
+        );
+
+        questionnaire.addQuestion(imageQuestion);
+
+        return questionnaire;
+    }
+
     public Question editQuestion(Question question, Long questionId) throws NotFoundException {
         Question editable = getQuestion(questionId);
         editable.setTitle(question.getTitle());
@@ -59,6 +82,15 @@ public class QuestionnaireService {
         editable.setMandatory(question.getMandatory());
 
         return questionRepository.save(editable);
+    }
+
+    public Question editImageQuestion(Long questionId, MultipartFile image) throws NotFoundException, IOException, UnsupportedStorageTypeException {
+        Question question = getQuestion(questionId);
+        DatabaseFile oldFile = question.getImage();
+        question.setImage(fileService.uploadFileToLocalStorage(image));
+        fileService.deleteFile(oldFile);
+
+        return questionRepository.save(question);
     }
 
     public Question getQuestion(Long questionId) throws NotFoundException {

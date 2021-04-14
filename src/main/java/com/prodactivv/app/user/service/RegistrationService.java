@@ -60,7 +60,6 @@ public class RegistrationService {
                     user.setRole(User.Roles.USER.getRoleName());
                     User.Dto.Simple userDto = User.Dto.Simple.fromUser(userRepository.save(user));
                     userDto.setToken(authService.generateTokenForUser(user).getToken());
-                    mailService.sendWelcomeMessage(user.getEmail(), new HashMap<>());
                     return userDto;
                 } else {
                     throw new UserRegistrationException("Email is already taken");

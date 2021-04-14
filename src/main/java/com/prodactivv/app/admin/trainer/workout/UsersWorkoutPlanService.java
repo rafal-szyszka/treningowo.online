@@ -1,5 +1,6 @@
 package com.prodactivv.app.admin.trainer.workout;
 
+import com.prodactivv.app.admin.mails.MailNotificationService;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan.UsersWorkoutPlanDTO;
 import com.prodactivv.app.admin.trainer.models.WorkoutPlan;
@@ -12,7 +13,9 @@ import com.prodactivv.app.user.model.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +27,8 @@ public class UsersWorkoutPlanService {
     private final UsersWorkoutPlanRepository repository;
     private final UserRepository userRepository;
     private final WorkoutPlanRepository workoutPlanRepository;
+
+    private final MailNotificationService mailService;
 
 
     public UsersWorkoutPlanDTO createUsersWorkoutPlan(Long userId, WorkoutPlan workoutPlan) throws UserNotFoundException {
@@ -61,12 +66,16 @@ public class UsersWorkoutPlanService {
         );
     }
 
-    public UsersWorkoutPlanDTO activate(Long id) throws NotFoundException {
+    public UsersWorkoutPlanDTO activate(Long id) throws NotFoundException, MessagingException {
         UsersWorkoutPlan usersWorkoutPlan = repository.findById(id).orElseThrow(new NotFoundException(String.format("Plan %s not found", id)));
         repository.findAllByUserId(usersWorkoutPlan.getUser().getId()).forEach(plan -> {
             plan.setIsActive(false);
             repository.save(plan);
         });
+
+        HashMap<String, String> variables = new HashMap<>();
+        variables.put("{redirect.url}", "https://treningowo.online");
+        mailService.sendPlanReadyNotification(usersWorkoutPlan.getUser().getEmail(), variables);
 
         usersWorkoutPlan.setIsActive(true);
         return UsersWorkoutPlanDTO.of(repository.save(usersWorkoutPlan));

@@ -9,6 +9,7 @@ import com.prodactivv.app.user.model.User;
 import com.prodactivv.app.user.service.RegistrationService;
 import com.prodactivv.app.user.service.UserRegistrationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,14 +25,21 @@ import java.util.Optional;
 @RequestMapping(value = "/public")
 public class RegistrationController {
 
+    @Value("${app.homePage.url}")
+    private String homePage;
+
     private final RegistrationService service;
     private final MailNotificationService mailService;
 
     @PostMapping(value = "/sign-up")
     public ResponseEntity<User.Dto.Simple> signUp(@RequestBody User.Dto.UserRegistration user) {
         try {
-            return ResponseEntity.ok(service.signUp(user));
-        } catch (UserRegistrationException | MandatoryRegulationsNotAcceptedException e) {
+            User.Dto.Simple registered = service.signUp(user);
+            HashMap<String, String> variables = new HashMap<>();
+            variables.put("{redirect.url.profile}", homePage);
+            mailService.sendWelcomeMessage(registered.getEmail(), variables);
+            return ResponseEntity.ok(registered);
+        } catch (UserRegistrationException | MessagingException | NotFoundException | MandatoryRegulationsNotAcceptedException e) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST, e.getMessage(), e
             );

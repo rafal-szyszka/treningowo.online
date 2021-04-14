@@ -4,11 +4,14 @@ import com.prodactivv.app.admin.survey.model.Question;
 import com.prodactivv.app.admin.survey.model.Questionnaire;
 import com.prodactivv.app.admin.survey.model.QuestionnaireResult;
 import com.prodactivv.app.core.exceptions.NotFoundException;
+import com.prodactivv.app.core.files.UnsupportedStorageTypeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -31,6 +34,24 @@ public class QuestionnaireController {
         try {
             return ResponseEntity.ok(service.addQuestion(question, id));
         } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PostMapping(value = "/{id}/imageQuestion/{typeName}")
+    public ResponseEntity<Questionnaire> addImageQuestion(@PathVariable Long id, @PathVariable String typeName, @RequestParam MultipartFile image) {
+        try {
+            return ResponseEntity.ok(service.addImageQuestion(id, image, typeName));
+        } catch (NotFoundException | IOException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @PutMapping(value = "/imageQuestion/{questionId}")
+    public ResponseEntity<Question> editImageQuestion(@PathVariable Long questionId, @RequestParam MultipartFile image) {
+        try {
+            return ResponseEntity.ok(service.editImageQuestion(questionId, image));
+        } catch (NotFoundException | IOException | UnsupportedStorageTypeException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

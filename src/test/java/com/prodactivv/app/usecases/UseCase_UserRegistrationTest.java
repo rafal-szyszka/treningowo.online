@@ -28,7 +28,7 @@ public class UseCase_UserRegistrationTest {
 
     private final User.Dto.UserRegistration user = User.Dto.UserRegistration.builder()
             .sex("MALE")
-            .email("test@mail.com")
+            .email("rsonic94+tests@mail.com")
             .birthday(LocalDate.parse("1994-03-20"))
             .name("TEST")
             .lastName("TEST")
@@ -46,7 +46,7 @@ public class UseCase_UserRegistrationTest {
             userDTO = registrationService.signUp(user);
 
             assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
-            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("rsonic94+tests@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException e) {
             assertNull(e);
@@ -62,7 +62,7 @@ public class UseCase_UserRegistrationTest {
             userDTO = registrationService.signUp(user);
 
             assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
-            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("rsonic94+tests@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException e) {
             assertNull(e);
@@ -78,7 +78,7 @@ public class UseCase_UserRegistrationTest {
             userDTO = registrationService.signUp(user);
 
             assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
-            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("rsonic94+tests@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException e) {
             assertNull(e);
@@ -94,7 +94,7 @@ public class UseCase_UserRegistrationTest {
             userDTO = registrationService.signUp(user);
 
             assertEquals(Long.valueOf(27), Long.valueOf(userDTO.getAge()));
-            assertEquals("test@mail.com", userDTO.getEmail());
+            assertEquals("rsonic94+tests@mail.com", userDTO.getEmail());
             assertEquals("user", userDTO.getRole());
         } catch (UserRegistrationException | MandatoryRegulationsNotAcceptedException e) {
             assertNull(e);

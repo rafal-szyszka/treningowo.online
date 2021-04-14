@@ -1,6 +1,7 @@
 package com.prodactivv.app.admin.survey.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.prodactivv.app.core.files.DatabaseFile;
 import lombok.*;
 
 import javax.persistence.*;
@@ -31,6 +32,10 @@ public class Question {
     private Long mandatory;
 
     private Long questionOrder;
+
+    @ManyToOne
+    @JoinColumn(name = "image_file_id")
+    private DatabaseFile image;
 
     @JsonIgnore
     @ManyToOne(fetch = FetchType.EAGER)

@@ -46,7 +46,7 @@ public class UseCase_WorkoutCreatorTest {
 
     private final User.Dto.UserRegistration user = User.Dto.UserRegistration.builder()
             .sex("MALE")
-            .email("not.taken.email@mail.com")
+            .email("rsonic94+tests2@mail.com")
             .birthday(LocalDate.parse("1994-03-20"))
             .name("TEST")
             .lastName("TEST")

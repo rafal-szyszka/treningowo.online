@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.MessagingException;
 import java.util.List;
 
 import static com.prodactivv.app.admin.trainer.models.ActivityWeek.ActivityWeekDTO;
@@ -186,7 +187,7 @@ public class WorkoutPrepController {
     public ResponseEntity<UsersWorkoutPlanDTO> activatePlan(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(usersWorkoutPlanService.activate(id));
-        } catch (NotFoundException e) {
+        } catch (NotFoundException | MessagingException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }
