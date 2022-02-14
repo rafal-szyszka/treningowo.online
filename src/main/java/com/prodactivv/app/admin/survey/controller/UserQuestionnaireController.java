@@ -14,11 +14,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.QuestionnaireResultDto;
 
@@ -39,6 +36,19 @@ public class UserQuestionnaireController {
         try {
             return ResponseEntity.ok(service.getQuestionnaire(id));
         } catch (NotFoundException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
+        }
+    }
+
+    @GetMapping(value = "/resultFor/{id}")
+    public ResponseEntity<List<QuestionnaireResult>> getResultForQuestionnaire(@RequestHeader(HttpHeaders.AUTHORIZATION) String auth, @PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(
+                    service.getQuestionnaireResultForUser(
+                            id, Long.valueOf(jwtUtils.obtainClaimWithIntegrityCheck(auth, JwtUtils.CLAIM_ID))
+                    )
+            );
+        } catch (DisintegratedJwsException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage(), e);
         }
     }

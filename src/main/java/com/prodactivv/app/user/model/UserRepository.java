@@ -12,9 +12,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findUserByEmail(String email);
 
-    @Query("SELECT u FROM User u WHERE u.role = 'user'")
+    @Query("SELECT u FROM User u WHERE u.role = 'user' AND COALESCE(u.isActive, true) = true")
     List<User> findAllUsers();
 
-    @Query("SELECT u FROM User u WHERE u.role = 'DIETITIAN'")
+    @Query("SELECT u FROM User u WHERE u.role = 'DIETITIAN' AND COALESCE(u.isActive, true) = true")
     List<User> findAllDietitians();
+
+    @Query("SELECT u FROM User u WHERE u.role = 'ADMIN' AND COALESCE(u.isActive, true) = true")
+    List<User> findAllAdmins();
 }

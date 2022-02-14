@@ -12,7 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Getter
 @Setter
@@ -57,6 +59,8 @@ public class User {
     private Boolean acceptedPrivacyPolicy;
 
     private Boolean acceptedWaiverOfRightsToWithdraw;
+
+    private Boolean isActive;
 
     @PrePersist
     public void hashPassword() throws NoSuchAlgorithmException {
@@ -302,6 +306,23 @@ public class User {
 
             public boolean isSubscribedToPlanWithTrainings() {
                 return subscriptions.stream().anyMatch(subscription -> subscription.getPlan().hasTrainingPlan());
+            }
+
+            public Long getSubscribedTrainingPlanDaysLeft() {
+                Optional<UserSubscription.Dto.FullUserLess> maxLengthTrainingPlan = subscriptions.stream()
+                        .filter(subscription -> subscription.getPlan().hasTrainingPlan())
+                        .max(Comparator.comparingLong(UserSubscription.Dto.FullUserLess::getDaysLeft));
+
+                Optional<UserSubscription.Dto.FullUserLess> maxLengthDietPlan = subscriptions.stream()
+                        .filter(subscription -> subscription.getPlan().hasDietPlan())
+                        .max(Comparator.comparingLong(UserSubscription.Dto.FullUserLess::getDaysLeft));
+
+                if (maxLengthTrainingPlan.isPresent()) {
+                    return maxLengthTrainingPlan.get().getDaysLeft() * 10;
+                } else if (maxLengthDietPlan.isPresent()) {
+                    return maxLengthDietPlan.get().getDaysLeft();
+                }
+                return 0L;
             }
         }
     }

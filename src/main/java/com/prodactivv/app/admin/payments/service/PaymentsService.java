@@ -9,6 +9,10 @@ import com.prodactivv.app.config.P24Defaults;
 import com.prodactivv.app.core.events.EventService;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.core.security.TokenValidityService;
+import com.prodactivv.app.subscription.model.SubscriptionPlan;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserSubscription;
+import com.prodactivv.app.user.service.UserService;
 import com.prodactivv.app.user.service.UserSubscriptionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +31,7 @@ import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -35,6 +40,7 @@ public class PaymentsService {
 
     private final P24Defaults p24Defaults;
     private final PaymentRequestRepository repository;
+    private final UserService userService;
     private final MailNotificationService mailService;
     private final TokenValidityService tokenValidityService;
     private final UserSubscriptionService subscriptionService;
@@ -115,19 +121,36 @@ public class PaymentsService {
             paymentRequest.setIsVerified(true);
             paymentRequest.setIsFinalized(status.equalsIgnoreCase("success"));
             repository.save(paymentRequest);
-            subscriptionService.subscribe(paymentRequest.getUser(), paymentRequest.getPlan(), LocalDate.now().plusMonths(paymentRequest.getPlan().getIntermittency()));
+            UserSubscription.Dto.Full subscription = subscriptionService.subscribe(paymentRequest.getUser(), paymentRequest.getPlan(), LocalDate.now().plusMonths(paymentRequest.getPlan().getIntermittency()));
 
             String shortToken = tokenValidityService.createTokenValidityForUser(paymentRequest.getUser()).getShortToken();
             HashMap<String, String> variables = new HashMap<>();
             variables.put("{redirect.url}", p24Defaults.getQuestionnaireUrl() + shortToken);
             mailService.sendPurchaseConfirmationEmail(paymentRequest.getUser().getEmail(), variables);
             eventService.createUserBasedEvent(EventService.EventType.FILL_QUESTIONNAIRE, paymentRequest.getUser(), shortToken);
+            notifyAdminsAndDietitians(subscription, paymentRequest.getUser());
         } else {
             paymentRequest.setIsVerified(false);
             paymentRequest.setIsFinalized(false);
             log.info(statusResponse.message());
             repository.save(paymentRequest);
             mailService.sendNotification(paymentRequest.getUser().getEmail(), "Błąd płatności", "Wystąpił błąd podczas przetwarzania płatności!");
+        }
+
+    }
+
+    private void notifyAdminsAndDietitians(UserSubscription.Dto.Full subscription, User user) {
+        List<User> dietitians = userService.getAllDietitians();
+        List<User> admins = userService.getAllAdmins();
+
+        SubscriptionPlan.Dto.Full plan = subscription.getSubscription().getPlan();
+
+        if (plan.getTrainingQuestionnaireId().isPresent() || plan.getCombinedQuestionnaireId().isPresent()) {
+            admins.forEach(admin -> mailService.sendNewClientNotificationEmail(admin.getEmail(), subscription, user));
+        }
+
+        if (plan.getDietaryQuestionnaireId().isPresent() || plan.getCombinedQuestionnaireId().isPresent()) {
+            dietitians.forEach(dietitian -> mailService.sendNewClientNotificationEmail(dietitian.getEmail(), subscription, user));
         }
 
     }

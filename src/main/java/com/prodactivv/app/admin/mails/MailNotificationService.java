@@ -5,6 +5,8 @@ import com.prodactivv.app.admin.mails.model.NotificationRepository;
 import com.prodactivv.app.admin.usermanagement.model.UserInvite;
 import com.prodactivv.app.core.exceptions.NotFoundException;
 import com.prodactivv.app.newsletter.ContactData;
+import com.prodactivv.app.user.model.User;
+import com.prodactivv.app.user.model.UserSubscription;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -52,6 +54,20 @@ public class MailNotificationService {
                 userInvite.getUser().getEmail(),
                 subject,
                 content
+        );
+    }
+
+    public void sendNewClientNotificationEmail(String emailTo, UserSubscription.Dto.Full userSubscription, User user) {
+        sendNotification(
+                emailTo,
+                "Nowy podopieczny",
+                String.format(
+                        "Zarejestrował się nowy użytkownik: %s %s (%s)\nZakupiono plan: %s\tważny do: %s" +
+                        "\n\nZgoda na rozpoczęcie wykonywania świadczenia przed upływem terminu do odstąpienia umowy: %s",
+                        userSubscription.getUser().getName(), userSubscription.getUser().getName(), userSubscription.getUser().getEmail(),
+                        userSubscription.getSubscription().getPlan().getName(), userSubscription.getSubscription().getUntil(),
+                        user.getAcceptedWaiverOfRightsToWithdraw() ? "TAK" : "NIE"
+                )
         );
     }
 

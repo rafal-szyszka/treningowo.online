@@ -4,11 +4,8 @@ import com.prodactivv.app.admin.survey.controller.QuestionnaireService;
 import com.prodactivv.app.admin.survey.model.Questionnaire;
 import com.prodactivv.app.admin.trainer.models.UsersWorkoutPlan;
 import com.prodactivv.app.admin.trainer.workout.UsersWorkoutPlanService;
-import com.prodactivv.app.core.exceptions.DisintegratedJwsException;
 import com.prodactivv.app.core.exceptions.IllegalAccessException;
-import com.prodactivv.app.core.exceptions.NotFoundException;
-import com.prodactivv.app.core.exceptions.UnreachableFileStorageTypeException;
-import com.prodactivv.app.core.exceptions.UserNotFoundException;
+import com.prodactivv.app.core.exceptions.*;
 import com.prodactivv.app.core.files.DatabaseFile;
 import com.prodactivv.app.core.files.DatabaseFileService;
 import com.prodactivv.app.core.files.UnsupportedStorageTypeException;
@@ -46,6 +43,14 @@ public class UserService {
     private final QuestionnaireService questionnaireService;
     private final DatabaseFileService fileService;
 
+    public List<User> getAllAdmins() {
+        return repository.findAllAdmins();
+    }
+
+    public List<User> getAllDietitians() {
+        return repository.findAllDietitians();
+    }
+
     public InputStream getDietFile(Long id) throws FileNotFoundException, NotFoundException, UnreachableFileStorageTypeException {
         return fileService.downloadFile(id);
     }
@@ -66,6 +71,7 @@ public class UserService {
             return repository.findAllUsers().stream()
                     .map(this::getFullUser)
                     .filter(User.Dto.Full::isSubscribedToPlanWithTrainings)
+//                    .sorted(Comparator.comparingLong(User.Dto.Full::getSubscribedTrainingPlanDaysLeft).reversed())
                     .collect(Collectors.toList());
         }
     }

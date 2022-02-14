@@ -34,6 +34,13 @@ public class Answer {
     @JoinColumn(name = "questionnaire_result_id")
     private QuestionnaireResult questionnaireResult;
 
+    @SuppressWarnings("CopyConstructorMissesField")
+    public Answer(Answer answer) {
+        this.question = answer.getQuestion();
+        this.answer = answer.getAnswer();
+        this.file = answer.getFile();
+    }
+
     @Setter
     @Getter
     @NoArgsConstructor
@@ -48,5 +55,11 @@ public class Answer {
         private String answer;
 
         private DatabaseFile file;
+
+        public AnswerDto(Answer answer) {
+            this.questionId = answer.getQuestion().getId();
+            this.answer = answer.getAnswer();
+            this.file = answer.getFile();
+        }
     }
 }

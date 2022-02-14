@@ -13,10 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.prodactivv.app.admin.survey.model.QuestionnaireResult.QuestionnaireResultDto;
@@ -114,6 +111,9 @@ public class QuestionnaireService {
         Questionnaire questionnaire = repository.findById(id).orElseThrow(new NotFoundException(String.format("Questionnaire %s not found!", id)));
         User user = userRepository.findById(userId).orElseThrow(new NotFoundException(String.format("User %s not found!", userId)));
 
+        List<Answer.AnswerDto> backupFileAnswers = backupFileAnswers(id, user);
+        deletePreviouslySubmitted(id, user);
+
         QuestionnaireResult result = QuestionnaireResult.builder()
                 .dateTaken(LocalDate.now())
                 .questionnaire(questionnaire)
@@ -121,11 +121,36 @@ public class QuestionnaireService {
                 .build();
 
         result = questionnaireResultRepository.save(result);
+
+        List<Answer.AnswerDto> answerDtoList = answers.getAnswers();
+        answerDtoList.addAll(backupFileAnswers);
         result.setAnswers(
-                answerService.createAnswers(answers.getAnswers(), result)
+                answerService.createAnswers(answerDtoList, result)
         );
 
         return result;
+    }
+
+    private List<Answer.AnswerDto> backupFileAnswers(Long id, User user) {
+        List<QuestionnaireResult> previousResults = questionnaireResultRepository.findAllUserQuestionnaireResults(id, user.getId());
+
+        if (!previousResults.isEmpty()) {
+            QuestionnaireResult lastResult = previousResults.get(0);
+            return lastResult.getAnswers().stream()
+                    .filter(answer -> answer.getFile() != null)
+                    .map(Answer.AnswerDto::new)
+                    .collect(Collectors.toList());
+        }
+
+        return Collections.emptyList();
+    }
+
+    private void deletePreviouslySubmitted(Long id, User user) {
+        List<QuestionnaireResult> previousResults = questionnaireResultRepository.findAllUserQuestionnaireResults(id, user.getId());
+
+        if (!previousResults.isEmpty()) {
+            previousResults.forEach(questionnaireResultRepository::delete);
+        }
     }
 
     public List<DatabaseFile> saveQuestionnaireFiles(Long id, MultipartFile[] files, Map<String, String> filesMap) throws NotFoundException, IOException {
@@ -134,10 +159,10 @@ public class QuestionnaireService {
 
         List<DatabaseFile> savedFiles = new ArrayList<>();
 
-
         for (MultipartFile file : files) {
             Long questionId = Long.valueOf(filesMap.get(file.getOriginalFilename()));
             if (questionId != 0L) {
+                deletePreviousAnswerForQuestion(questionId, id, questionnaireResult);
                 DatabaseFile savedFile = fileService.uploadFileToLocalStorage(file);
                 answerService.createAnswers(
                         Collections.singletonList(
@@ -156,6 +181,18 @@ public class QuestionnaireService {
 
         return savedFiles;
 
+    }
+
+    private void deletePreviousAnswerForQuestion(Long questionId, Long questionnaireResultId, QuestionnaireResult questionnaireResult) {
+        try {
+            Answer answer = answerService.getAnswer(questionId, questionnaireResultId);
+            questionnaireResult.deleteAnswer(answer);
+            answerService.deleteAnswer(answer);
+        } catch (NotFoundException e) {
+            // that's ok
+        } catch (UnsupportedStorageTypeException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Question editQuestionMoveByStep(Long questionId, Long step) throws NotFoundException {

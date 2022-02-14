@@ -33,7 +33,7 @@ public class TokenValidityService {
                 TokenValidity.builder()
                         .token(token)
                         .shortToken(hashGenerator.generateSha384Hash(Collections.singletonList(token)))
-                        .until(LocalDateTime.now().plusHours(1L))
+                        .until(LocalDateTime.now().plusHours(jwtUtils.getTTL()))
                         .user(user)
                         .build()
         );

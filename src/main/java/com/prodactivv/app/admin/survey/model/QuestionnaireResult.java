@@ -39,6 +39,10 @@ public class QuestionnaireResult {
 
     private LocalDate dateTaken;
 
+    public void deleteAnswer(Answer answer) {
+        answers.remove(answer);
+    }
+
     @Setter
     @Getter
     @NoArgsConstructor
